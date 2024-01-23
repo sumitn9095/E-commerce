@@ -1,0 +1,38 @@
+<p>defer works!</p>
+
+<button #trg1>TRG-1</button> | <button #trg2>TRG-2</button>
+<br />
+
+<p-panel header="Heavy Component">
+    @defer (on hover(trg1); prefetch on timer(0)) {
+        <i class="pi pi-search" style="font-size: 2rem"></i>
+        <app-heavy>TRG-1 componenent</app-heavy>
+    } @placeholder {
+        <div>
+            <p-skeleton styleClass="mb-2"></p-skeleton>
+            <p-skeleton styleClass="mb-2"></p-skeleton>
+            <p-skeleton styleClass="mb-2"></p-skeleton>
+        </div>
+    } @loading {
+        <p-progressSpinner></p-progressSpinner>
+    } @error {
+        <i class="pi pi-search" style="font-size: 2rem"></i>
+    }
+
+
+    @defer (on interaction(trg2); prefetch on timer(0)) {
+        <i class="pi pi-search" style="font-size: 2rem"></i>
+        <app-heavy>TRG-2 component</app-heavy>
+    } @placeholder {
+        <div>
+            <p-skeleton styleClass="mb-2"></p-skeleton>
+            <p-skeleton styleClass="mb-2"></p-skeleton>
+            <p-skeleton styleClass="mb-2"></p-skeleton>
+        </div>
+    } @loading {
+        <p-progressSpinner></p-progressSpinner>
+    } @error {
+        <i class="pi pi-search" style="font-size: 2rem"></i>
+    }
+</p-panel>
+

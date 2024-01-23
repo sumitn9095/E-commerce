@@ -1,0 +1,31 @@
+<div class="flex flex-col xl:flex-row xl:items-start p-4 gap-4" >
+    <img title="Product Image" class="w-20 sm:w-16rem shadow-2 block xl:block mx-auto border-round" [src]="'https://placehold.co/140x93?text=Hello+World'" [alt]="'Product Image'" />
+    <div class="flex flex-col sm:flex-row justify-between items-center xl:items-start flex-1 gap-4">
+        <div class="flex flex-col items-center sm:items-start gap-3">
+            <div class="text-md font-bold text-900">{{ item?.equipment }}</div>
+            <div class="flex items-center gap-3">
+                <span class="flex items-center gap-2">
+                    <i class="pi pi-tag"></i>
+                    <span class="font-semibold">{{ item?.brand }}</span>
+                </span>
+                @if(item.qty > 1) {
+                    <span class="flex items-center gap-2">
+                        <i class="pi pi-tag"></i>
+                        <span class="text-sm">
+                            <span>{{ item?.qty }} x {{ item?.price }}</span>
+                        </span>
+                    </span>
+                }
+            </div>
+            <div class="flex items-center gap-3">
+                <button type="button" (click)="addQty()"> + </button>
+                <input title="qtyCount" type="number" [value]="qtyCount()" />
+                <button type="button" (click)="removeQty()"> - </button>
+            </div>
+        </div>
+        <div class="flex sm:flex-column align-items-center sm:align-items-end gap-3 sm:gap-2">
+            <span class="text-xl font-semibold">{{ item?.qty * item?.price }}</span>
+           
+        </div>
+    </div>
+</div>
