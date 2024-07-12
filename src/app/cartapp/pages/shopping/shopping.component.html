@@ -1,0 +1,21 @@
+<app-header [firstName]="_cart.firstName()" [lastName]="_cart.lastName()" (outputSideCart)="processOutputSideCart($event)" [cartQty]="_cart.totalQty()"></app-header>
+
+<div class="">
+    <div class="m-3 sm:w-8/12 mx-auto">
+<!-- 
+        @for(let g of (products$ | async)?.body; trackBy id;) {
+            {{ g }}
+        } -->
+        <!-- PPPPPPPPPPPP
+        <div *ngFor="let g of (products$ | async); track id">
+            {{g.equipment}}
+        </div>
+OOOOOOOOOOOO -->
+
+        <app-shopping-list-rxjs (addToCart_output)="addToCart($event)" (addProduct_output)="addProduct($event)"></app-shopping-list-rxjs>
+        
+        <!-- <a (click)="_cart.toggleSideCartPanel()">open</a> -->
+        <app-sidecart [detectChange]="_cart.onDetectChangeSideCart()"></app-sidecart>
+        <!-- <app-sidecart [shouldOpenSideCart]="shouldOpenSideCart()"></app-sidecart> -->
+    </div>
+</div>

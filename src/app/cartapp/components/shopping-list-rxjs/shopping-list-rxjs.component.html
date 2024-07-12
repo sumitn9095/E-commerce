@@ -1,0 +1,82 @@
+<a (click)="filter_products('lessThan',300);">Cheap</a>
+    <a (click)="filter_products('moreThan',700);">Expensive</a>
+    <a (click)="filter_products('all',0);">Reset</a>
+
+<p-panel header="Header">
+
+    <!--
+    <div class="flex justify-end">
+        <p-inputGroup class="w-auto">
+            <p-inputGroupAddon>
+                <i class="pi pi-search"></i>
+            </p-inputGroupAddon>
+            <input pInputText placeholder="Username" />
+        </p-inputGroup>
+    </div>
+    -->
+
+    
+
+<!-- 
+    @defer (when (filteredProducts_signal() !== undefined && filteredProducts_signal().length); prefetch on timer(0)) { -->
+        @defer (on viewport; prefetch on timer(0)) {
+            <div class="form-group">
+                <form [formGroup]="buyProductsForm">
+                    <!-- <a (click)="getselectedProducts()">Get selected products</a> -->
+                    <input type="checkbox" class="" placeholder="selectedAny" name="selectedAny" formControlName="selectedAny"  />
+                    <div class="flex items-start justify-center">
+                        <div class="w-full mx-auto">
+                            <div class="card">
+                                <button type="button" (click)="addToCart()">Buy</button>
+
+                                <!-- Attribute of the "p-table" -->
+                                <!-- [(selection)]="selectedProducts" -->
+
+                                <p-table [value]="productsCopy$ | async" [(selection)]="selectedProducts" dataKey="id" [tableStyle]="{'min-width': '50rem'}">
+                                    <ng-template pTemplate="header">
+                                        <tr>
+                                            <th style="width: 4rem">
+                                                <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+                                            </th>
+                                            <th>Id</th>
+                                            <th>Brand</th>
+                                            <th>Equipment</th>
+                                            <th>Price</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </ng-template>
+                                    <ng-template pTemplate="body" let-product>
+                                        <tr>
+                                            <td>
+                                                <p-tableCheckbox [value]="product"></p-tableCheckbox>
+                                            </td>
+                                            <td>{{product.id}}</td>
+                                            <td>{{product.brand}}</td>
+                                            <td>{{product.equipment}}</td>
+                                            <td>{{product.price}}</td>
+                                            <td>
+                                                <p-button severity="success" (click)="addProduct(product)" > + </p-button>
+                                            
+                                            </td>
+                                        </tr>
+                                    </ng-template>
+                                </p-table>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+                <!-- <p-button severity="success"  (click)="processForm()" [disabled]="!buyProductsForm.valid">Proceed to Finish</p-button> -->
+            </div>
+        } @placeholder {
+            <div></div>
+        } @loading {
+            <p-progressSpinner></p-progressSpinner>
+            <div>
+                <p-skeleton styleClass="mb-2"></p-skeleton>
+                <p-skeleton styleClass="mb-2"></p-skeleton>
+                <p-skeleton styleClass="mb-2"></p-skeleton>
+            </div>
+        } @error {
+            <i class="pi pi-search" style="font-size: 2rem"></i>
+        }
+</p-panel>

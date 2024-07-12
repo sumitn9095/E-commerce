@@ -1,0 +1,57 @@
+<app-header [firstName]="cn['firstName'].value" [lastName]="cn['lastName'].value"></app-header>
+<div class="">
+    <div class="m-3 sm:w-8/12 mx-auto">
+        <div class="card">
+            <p-steps [model]="formSteps" [readonly]="false" [activeIndex]="activeIndex" (activeIndexChange)="onActiveIndexChange($event)"></p-steps>
+        </div>
+        <p-panel header="Header">
+                <div class="form-group">
+                    <form [formGroup]="studentRegForm">
+                        <div [class.ht0]="this._cart.registrationStep !== 1">
+                            <div class="flex items-center gap-6  justify-center">
+                                <div class="w-full">
+                                    <label for="username">First Name</label>
+                                    <input [title]="_cart.firstName()" type="text" class="w-full p-inputtext-lg" placeholder="First Name" (focus)="currentInp($event)"  name="firstName" formControlName="firstName" pInputText [(ngModel)]="_cart.firstName"/>
+                                </div>
+                                <div class="w-full">
+                                    <label for="username">Last Name</label>
+                                    <input [title]="_cart.lastName()" type="text" class="w-full p-inputtext-lg" placeholder="Last Name" (focus)="currentInp($event)"  name="lastName" formControlName="lastName" pInputText [(ngModel)]="_cart.lastName" />
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-center mt-4">
+                                <div class="w-full">
+                                    <label for="username">DOB</label>
+                                    <p-calendar name="birthDate" class="w-full block p-inputtext-lg" formControlName="birthDate" pInputText (onFocus)="currentInp($event)"></p-calendar>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-center mt-4" [class.ht0]="this._cart.registrationStep !== 2">
+                            <div class="w-full">
+                                <label for="username">8th Standard Percent</label>
+                                <input  type="text" class="w-full p-inputtext-lg" placeholder="Standard 8th percent" (focus)="currentInp($event)" name="standard8th" formControlName="standard8th" pInputText />
+                            </div>
+         
+                            <div class="w-full">
+                                <label for="username">9th Standard Percent</label>
+                                <input  type="text" class="w-full p-inputtext-lg" placeholder="Standard 9th percent" (focus)="currentInp($event)" name="standard9th" formControlName="standard9th" pInputText />
+                            </div>
+              
+                            <div class="w-full">
+                                <label for="username">10th Standard Percent</label>
+                                <input  type="text" class="w-full p-inputtext-lg" placeholder="Standard 10th percent" (focus)="currentInp($event)" name="standard10th" formControlName="standard10th" pInputText />
+                            </div>
+                        </div>
+                    </form>
+                    this.isSectionValid--{{this._cart.registrationStep}}--{{this.isSectionValid}}
+
+                    {{this.cn['firstName'].valid}} {{this.cn['lastName'].valid}} {{this.cn['birthDate'].valid}}
+
+                    <p-button severity="success"  (click)="processForm()" [disabled]="!isSectionValid">Proceed to Buy</p-button>
+                </div>
+        </p-panel>
+    </div>
+</div>
+
+<p-toast position="top-right"  [baseZIndex]="5000">
+    <p>sdfdsfdf</p>
+</p-toast>

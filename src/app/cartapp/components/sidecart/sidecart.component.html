@@ -1,0 +1,21 @@
+<!--  Sidebar -->
+<div class="card flex flex-wrap justify-content-center gap-2">
+    <p-sidebar [className]="'side_cart'" [dismissible]="false"  [(visible)]="isTrueSet" (onHide)="_cart.toggleSideCartPanel()" position="right">
+        <h3>My Cart -- {{isTrueSet}}</h3>
+        <p-dataView #dv [value]="_cart.cart()">
+            <ng-template pTemplate="list" >
+                <div class="grid grid-nogutter">
+                        @for(item of _cart.cart(); track item.name) {
+                            <div class="col-12">
+                                <app-product-display-big [item]="item" (evt)="updateCart($event)"></app-product-display-big>
+                            </div>
+                        }
+                        <div>Sub Total: {{_cart.cartPrice()}}</div>
+                        <div>GST: {{_cart.gst()}}</div>
+                        <div>Delivery Charges: {{_cart.deliveryCharges()}}</div>
+                        <div>Cart Total Price: {{_cart.cartTotalPrice()}}</div>
+                </div>
+            </ng-template>
+        </p-dataView> 
+    </p-sidebar>
+</div>
