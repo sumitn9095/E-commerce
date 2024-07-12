@@ -1,0 +1,29 @@
+Signal Query ViewChild Example :
+
+<ng-container *ngTemplateOutlet="templateDemo" ></ng-container>
+
+<input #inpViewChild title="Viewchild example" [value]="'eeewww'" />
+<button title="dd" type="button" (click)="getSignalViewChild()">get Signal ViewChild</button>
+
+<div #vref></div>
+
+++++
+{{ signalViewchild() }}
+++++
+
+
+
+<ng-template #templateDemo >
+    <h3>Ng Template demo</h3>
+    <p>desc desc desc desc desc </p>
+    <time>4:45pm</time>
+</ng-template>
+<hr/>
+
+ContentChild :
+<app-content>
+   <p #pcontent >sss dd rr</p>
+</app-content>
+<hr/>
+
+ 

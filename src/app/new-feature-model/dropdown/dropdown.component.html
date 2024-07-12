@@ -1,0 +1,11 @@
+<!-- <label>
+    {{label()}}
+    <input type="checkbox" (click)="onCheck()" [checked]="value()" />
+</label> -->
+
+@for (value of value(); track value; let i = $index;) {
+    <label>
+        {{label()}}
+        <input type="checkbox" (click)="onCheck(i)" [checked]="value" />
+    </label>
+}

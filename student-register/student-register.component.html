@@ -1,0 +1,157 @@
+<!-- 
+@defer (when processFormCntr == 2; prefetch on timer(0)) {
+    <div class="card">
+        <p-toolbar>
+            <ng-template pTemplate="start">
+                <div class="flex align-items-center gap-2">
+                    <i class="pi pi-cart-plus" style="font-size: 2rem"></i>
+                    <span class="font-bold text-bluegray-50">{{ firstName() }} {{ lastName() }}</span>
+                </div>
+            </ng-template>
+            <ng-template pTemplate="end">
+                <div class="card flex justify-content-center">
+                    --{{_cart.sideCartOpen}}
+                    <i class="pi pi-cart-plus text-3xl" pBadge (click)="_cart.sideCartOpen = true" [value]="_cart.totalQty()"></i>
+                </div>
+            </ng-template>
+        </p-toolbar>
+    </div>
+} @placeholder {
+    
+} @loading {
+    <div>
+        <p-skeleton styleClass="mb-2"></p-skeleton>
+        <p-skeleton styleClass="mb-2"></p-skeleton>
+    </div>
+} @error {
+    <i class="pi pi-search" style="font-size: 2rem"></i>
+} 
+
+<div class="">
+    <div class="m-3 sm:w-8/12 mx-auto">
+        <div class="card">
+            <p-steps [model]="formSteps" [readonly]="false" [activeIndex]="activeIndex" (activeIndexChange)="onActiveIndexChange($event)"></p-steps>
+        </div>
+        <p-panel header="Header">
+            
+            @if(_cart.registrationStep < 2) {
+                <div class="form-group">
+                    <form [formGroup]="studentRegForm">
+                        <div class="flex items-center gap-6  justify-center">
+                            <div class="w-full">
+                                <label for="username">First Name</label>
+                                <input [title]="_cart.firstName" type="text" class="w-full p-inputtext-lg" placeholder="First Name" (focus)="currentInp($event)"  name="firstName" formControlName="firstName" pInputText [(ngModel)]="_cart.firstName"/>
+                            </div>
+                            <div class="w-full">
+                                <label for="username">Last Name</label>
+                                <input [title]="_cart.lastName" type="text" class="w-full p-inputtext-lg" placeholder="Last Name" (focus)="currentInp($event)"  name="lastName" formControlName="lastName" pInputText [(ngModel)]="_cart.lastName" />
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-center mt-4">
+                            <div class="w-full">
+                                <label for="username">DOB</label>
+                                <p-calendar name="birthDate" class="w-full block p-inputtext-lg" formControlName="birthDate" pInputText (onFocus)="currentInp($event)"></p-calendar>
+                            </div>
+                        </div>
+                    </form>
+                    <p-button severity="success"  (click)="processForm()" [disabled]="!studentRegForm.valid">Proceed to Buy</p-button>
+                </div>
+            }
+            @defer (when _cart.registrationStep  == 2; prefetch on timer(0)) {
+                <div class="form-group">
+                    <form [formGroup]="buyProductsForm">
+                        <a (click)="getselectedProducts()">Get selected products</a>
+                        <input type="checkbox" class="" placeholder="selectedAny" name="selectedAny" formControlName="selectedAny"  />
+                        <div class="flex items-start justify-center">
+                            <div class="sm:w-3/12 mx-auto">
+                                <div class="w-full card flex justify-content-center">
+                                    <p-listbox class="w-full" formControlName="courses" [options]="courses()" [(ngModel)]="selectedCourse" optionLabel="name"   ></p-listbox>
+                                </div> 
+                            </div>
+                            <div class="w-full mx-auto">
+                                <div class="card">
+                                    <button type="button" (click)="addToCart()">Buy</button>
+                                    <p-table [value]="products()" [(selection)]="selectedProducts" dataKey="id" [tableStyle]="{'min-width': '50rem'}">
+                                        <ng-template pTemplate="header">
+                                            <tr>
+                                                <th style="width: 4rem">
+                                                    <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+                                                </th>
+                                                <th>Id</th>
+                                                <th>Brand</th>
+                                                <th>Equipment</th>
+                                                <th>Price</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </ng-template>
+                                        <ng-template pTemplate="body" let-product>
+                                            <tr>
+                                                <td>
+                                                    <p-tableCheckbox [value]="product"></p-tableCheckbox>
+                                                </td>
+                                                <td>{{product.id}}</td>
+                                                <td>{{product.brand}}</td>
+                                                <td>{{product.equipment}}</td>
+                                                <td>{{product.price}}</td>
+                                                <td>
+                                                    <p-button severity="success" (click)="addProduct(product)" > + </p-button>
+                                                    <input [title]="'Qty of Units'" type="text" class="w-full p-inputtext-lg" placeholder="1" (focus)="currentInp($event)"  name="firstName" formControlName="firstName" pInputText [(ngModel)]="firstName"/>
+                                                    <p-button severity="success" (click)="removeQty(product.price)" > + </p-button>
+                                                </td>
+                                            </tr>
+                                        </ng-template>
+                                    </p-table>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                    <p-button severity="success"  (click)="processForm()" [disabled]="!buyProductsForm.valid">Proceed to Finish</p-button>
+                </div>
+            } @placeholder {
+                
+            } @loading {
+                <p-progressSpinner></p-progressSpinner>
+                <div>
+                    <p-skeleton styleClass="mb-2"></p-skeleton>
+                    <p-skeleton styleClass="mb-2"></p-skeleton>
+                    <p-skeleton styleClass="mb-2"></p-skeleton>
+                </div>
+            } @error {
+                <i class="pi pi-search" style="font-size: 2rem"></i>
+            }
+        </p-panel>
+    </div>
+</div>
+
+ <div class="card flex flex-wrap justify-content-center gap-2">
+    <p-sidebar  [(visible)]="sidebarVisible2" position="right">
+        <h3>My Cart</h3>
+        <p-dataView #dv [value]="_cart.cart()">
+            <ng-template pTemplate="list" >
+                <div class="grid grid-nogutter">    
+                        <div class="col-12" *ngFor="let item of _cart.cart()">
+                            <app-product-display-big [item]="item" (evt)="updateCart($event)"></app-product-display-big>
+                        </div>
+                        <div>Sub Total: {{_cart.cartPrice()}}</div>
+                        <div>GST: {{_cart.gst()}}</div>
+                        <div>Delivery Charges: {{_cart.deliveryCharges()}}</div>
+                        <div>Cart Total Price: {{_cart.cartTotalPrice()}}</div>
+                </div>
+            </ng-template>
+        </p-dataView> 
+    </p-sidebar>
+</div> 
+
+<p-toast position="top-right"  [baseZIndex]="5000">
+    <p>sdfdsfdf</p>
+    <ng-template let-message pTemplate="message">
+        <div class="flex flex-column align-items-start" >
+            <div class="flex align-items-center gap-2">
+                <span class="font-bold text-900">Amy Elsner</span>
+            </div>
+            <div class="font-medium text-lg my-3 text-900">dd</div>
+            <p-button class="p-button-sm" label="Reply" ></p-button>
+        </div>
+    </ng-template> 
+</p-toast>
+<button title="sd" type="button" pButton pRipple  (click)="showSuccess()">sdsd</button> 

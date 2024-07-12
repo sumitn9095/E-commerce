@@ -1,0 +1,13 @@
+<div class="box-wrap">
+    @for(v of itemq(); track v; let i = $index;) {
+        <div class="box">
+            <label>
+                {{" "}}
+                    <input type="text" [value]="v.name" (keyup)="onCheck('name',i,$event,v)" />
+                    <input type="checkbox" (click)="onCheck('check',i)" [checked]="v.checked" />
+            </label>
+        </div>
+    }
+</div>
+
+<button type="button" (click)="createSelectedBoxes()" class="btn btn-primary">Check</button>

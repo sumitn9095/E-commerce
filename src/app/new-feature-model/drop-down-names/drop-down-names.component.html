@@ -1,0 +1,17 @@
+<button type="button" title="wwew" (click)="isDropdownNameVisible = !isDropdownNameVisible">sadsad</button>
+@if(isDropdownNameVisible) {
+    <div>
+        <ng-template 
+        ngFor let-v [ngForOf]="itemq()" let-i=index >
+                <!-- @for(v of itemq(); track v; let i = $index;) { -->
+                    <div>
+                        <label>
+                            {{v.name}}
+                            <input type="text" [value]="v.name" (keyup)="onCheck('name',i,$event,v)" />
+                            <input type="checkbox" (click)="onCheck('check',i)" [checked]="v.checked" />
+                        </label>
+                    </div>
+                <!-- } -->
+        </ng-template>
+    </div>
+}
