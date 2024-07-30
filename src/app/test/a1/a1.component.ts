@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component ,ElementRef,OnChanges, AfterViewInit, SimpleChanges, ViewChild} from '@angular/core';
-import { TestService } from '../../test.service';
+import { TestService } from '../../cartapp/utility/test.service';
 
 @Component({
   selector: 'app-a1',

@@ -3,40 +3,32 @@ import { HeaderComponent } from '../../components/header/header.component';
 import { SidecartComponent } from '../../components/sidecart/sidecart.component';
 import { CartService } from '../../utility/cart.service';
 import { CourseService } from '../../utility/course.service';
-// import { PanelModule } from 'primeng/panel';
-// import { InputGroupModule } from 'primeng/inputgroup';
-// import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
-// import { ButtonModule } from 'primeng/button';
-// import { OverlayPanelModule } from 'primeng/overlaypanel';
-// import { ProgressSpinnerModule } from 'primeng/progressspinner';
-// import { SkeletonModule } from 'primeng/skeleton';
-// import { TableModule } from 'primeng/table';
-// import { HttpResponse } from '@angular/common/http';
+
 import { Validators, FormGroup, FormBuilder } from '@angular/forms';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-// import { toSignal } from '@angular/core/rxjs-interop';
-// import { catchError, filter, find, forkJoin, from, map, merge, mergeMap, Observable, of, range, switchMap, tap, throwError } from 'rxjs';
+
 import { AsyncPipe } from '@angular/common';
-// import { NgFor } from '@angular/common';
 import { ShoppingListRxjsComponent } from '../../components/shopping-list-rxjs/shopping-list-rxjs.component';
 import { RouterOutlet } from '@angular/router';
-import { ShoppingListSignalComponent } from "../../components/shopping-list-signal/shopping-list-signal.component";
+import { ShoppingListDbComponent } from '../../components/shopping-list-db/shopping-list-db.component';
 import { MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
 import { LatestProduct } from '../../utility/latest-product';
 
+
 @Component({
-  selector: 'app-shopping',
+  selector: 'app-shopping-with-db',
   standalone: true,
-  imports: [RouterOutlet, ShoppingListSignalComponent, HeaderComponent, ShoppingListRxjsComponent, FormsModule, ReactiveFormsModule, SidecartComponent, ToastModule, AsyncPipe, ShoppingListSignalComponent],
+  imports: [RouterOutlet, HeaderComponent, ShoppingListRxjsComponent, FormsModule, ReactiveFormsModule, SidecartComponent, ToastModule, AsyncPipe, ShoppingListDbComponent],
   providers: [MessageService],
-  templateUrl: './shopping.component.html',
-  styleUrl: './shopping.component.scss'
+  templateUrl: './shopping-with-db.component.html',
+  styleUrl: './shopping-with-db.component.scss'
 })
-export class ShoppingComponent implements OnInit {
+export class ShoppingWithDbComponent implements OnInit {
+
   _cart = inject(CartService);
   _cs = inject(CourseService);
-  _ms = inject(MessageService)
+  _ms = inject(MessageService);
   // _fb = inject(FormBuilder)
 
   thisCart : WritableSignal<any[]> = signal<any[]>([])
@@ -59,40 +51,14 @@ export class ShoppingComponent implements OnInit {
     }
   }
   
-  constructor(){
-    // this.buyProductsForm = this._fb.group({
-    //   selectedAny : ['',[Validators.required]],
-    // });
-    // this.products = toSignal(this._cs.fetchProducts(), {initialValue: []});
-    // this.fetch_products();
-    // this.products_modified_signal = toSignal(this.products_modified$, {initialValue:[]});
-    // this.filter_products('all',0)
-    // this.filteredProducts_signal = toSignal(this.products_filtered_filtered$, {initialValue:[]});
-  }
-
-    // qtyEff = effect(()=>{
-    //   const opp = this._cart.cart();
-    //   console.log(`Items in Cart are`,opp);
-    //   setTimeout(() => {
-    //     this.calcCartDetails()
-    //   }, 300);
-    // },{allowSignalWrites: true})
-
-  ngOnInit(): void {
+  constructor(){}
     
+  ngOnInit(): void {
     // console.log("this.products--",this.products().body);
   }
 
-// processOutputSideCart(data:boolean){
-//   //console.log("processOutputSideCart",data);
-//   this.shouldOpenSideCart.set(data);
-//   console.log("processOutputSideCart",data);
-//   // this.shouldOpenSideCart.s
-// }
-
   notifyProductAdded() {
     this._ms.add({ key: 'addProduct', severity: 'success', summary: 'Can you send me the report?' });
-    
     let allEquipments = this.selectedProducts.map((r:any) => r.equipment);
     let allBrands = this.selectedProducts.map((r:any) => r.brand);
     let allCost = this.selectedProducts.map((r:any) => r.price);
@@ -109,10 +75,6 @@ export class ShoppingComponent implements OnInit {
   
   getselectedProducts(){
     console.log("selected Products are",this.selectedProducts)
-  }
-
-  removeQty(price:number){
-    console.log("prod removed",price)
   }
 
   updateCart(product:any) {

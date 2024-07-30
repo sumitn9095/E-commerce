@@ -1,0 +1,71 @@
+<div>
+    <!-- <mat-form-field appearance="fill">
+        <mat-label>Search</mat-label> -->
+        <input  #globalSearch placeholder="Favorite food" [name]="'search'" (keydown.enter)="search($event.target)" />
+    <!-- </mat-form-field> -->
+
+    <!-- <mat-form-field appearance="fill">
+        <mat-label>Columns</mat-label>
+        <mat-select [(ngModel)]="columnsShow" (selectionChange)="updateColumnsShow($event)" multiple>
+          <mat-option *ngFor="let col of columns" [value]="col">{{col}}</mat-option>
+        </mat-select>
+      </mat-form-field> -->
+
+      <!-- <select [(ngModel)]="columnsShow" (selectionChange)="updateColumnsShow($event)" multiple>
+        <option *ngFor="let col of columns" [value]="col">{{col}}</option>
+      </select> -->
+    
+    <div class="table">
+        <div class="thead">
+            <div class="tr">
+                @for(col of columnsShow; track col.id) {
+                    <div class="th c1">
+                        <a #sort_action_date data_sort="asc" (click)="sortTable(col, $event)">{{col}}</a><span>  {{(sort.column == col && sort.dir == 'desc') ? 'DESC' : ''}}  {{(sort.column == col && sort.dir == 'asc') ? 'ASC' : ''}} </span>
+                        <!-- <mat-form-field appearance="fill">
+                            <mat-label>Search</mat-label> -->
+                            <input #singleSearch placeholder="Favorite food" [name]="col" (keydown.enter)="search($event.target,col)" />
+                        <!-- </mat-form-field> -->
+                    </div>
+                } 
+            </div>
+        </div>
+        <!-- *ngFor="let my_order of sortedPostsData; let isFirst = first; let inx = index" -->
+        <div class="tbody order_details_tbody">
+
+            <!-- *ngFor="let  my_order of sortedPostsData | paginate: config" -->
+            @for( my_order of sortedPostsData | paginate: config; track my_order.id;){
+            <div id="order_{{my_order._id}}" class="tr-wrap"
+             id="order_{{my_order._id}}">
+                <div class="tr">
+                    <div >
+                    </div>
+                    @for(col of columnsShow; track col.id;){
+                        <div class="td c c1">
+                            <div>{{ my_order[col] }}</div>
+                        </div>
+                    }
+                </div>
+                <div class="td c6"></div>
+            </div>
+        }
+        </div>
+    </div>
+    
+    <div class="has-text-centered">
+        <pagination-controls (pageChange)="onPageChange($event)" (pageBoundsCorrection)="onPageBoundsCorrection($event)" [id]="gridID"></pagination-controls>
+    </div>
+    
+    <div>
+        <!-- <mat-form-field appearance="fill">
+            <mat-select [(ngModel)]="config.itemsPerPage"  (selectionChange)="onPageItemsCountChange()">
+                <mat-option *ngFor="let item of itemsPerPageOptions"  [value]="item" >{{item}}</mat-option>
+            </mat-select>
+        </mat-form-field> -->
+
+        <!-- <select [(ngModel)]="config.itemsPerPage"  (selectionChange)="onPageItemsCountChange()">
+            <option *ngFor="let item of itemsPerPageOptions"  [value]="item" >{{item}}</option>
+        </select> -->
+        
+    </div>
+    <p>Showing {{(config.itemsPerPage * (config.currentPage-1))}} to {{(config.currentPage + config.itemsPerPage)}} of {{config.totalItems}} entries</p>
+    </div>

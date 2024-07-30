@@ -2,20 +2,60 @@
 
 <div class="">
     <div class="m-3 sm:w-8/12 mx-auto">
-<!-- 
-        @for(let g of (products$ | async)?.body; trackBy id;) {
-            {{ g }}
-        } -->
-        <!-- PPPPPPPPPPPP
-        <div *ngFor="let g of (products$ | async); track id">
-            {{g.equipment}}
-        </div>
-OOOOOOOOOOOO -->
 
-        <app-shopping-list-rxjs (addToCart_output)="addToCart($event)" (addProduct_output)="addProduct($event)"></app-shopping-list-rxjs>
+        <!-- <router-outlet></router-outlet> -->
+        <!-- <app-shopping-list-rxjs (addToCart_output2)="addToCart($event)" (addProduct_output2)="addProduct($event)"></app-shopping-list-rxjs> -->
+
+        <app-shopping-list-signal (addToCart_output)="addToCart($event)" (addProduct_output)="addProduct($event)"></app-shopping-list-signal>
+
+        <!-- <p-button  pRipple  (onClick)="showBottomRight()" label="Bottom Right"  severity="help" /> -->
         
         <!-- <a (click)="_cart.toggleSideCartPanel()">open</a> -->
-        <app-sidecart [detectChange]="_cart.onDetectChangeSideCart()"></app-sidecart>
+        <app-sidecart [detectChange]="_cart.onDetectChangeSideCart()" [cart]="thisCart()"></app-sidecart>
+
+        <!-- (onClose)="onReject()"  -->
+        <p-toast 
+            position="bottom-right" 
+            key="addProduct" 
+            [baseZIndex]="5000">
+                <ng-template let-message pTemplate="message">
+                    <div class="flex flex-col align-items-start" style="flex: 1">
+                        <!-- <div class="flex align-items-center gap-2"> -->
+                        <div>
+                            <img title="{{ latestProductAdded.product.equipment }}" class="shadow-2 block xl:block mx-auto border-round" [src]="'https://placehold.co/362x180?text='+ (latestProductAdded.type === 'single' ? latestProductAdded.product.equipment : selectedProductsDetails.equipments.toString()) " [alt]="'{{ latestProductAdded.product.equipment}}'" />
+                        </div>
+                        <div>
+                            <div class="flex flex-row">
+                                @if(latestProductAdded.type == 'single'){
+                                    <div class="w-60">
+                                        {{latestProductAdded.product.id}}
+                                    </div>
+                                }
+                                <div class="flex flex-row justify-between w-full font-bold text-900 ">
+                                    <div class="w-3/4">
+                                        {{ latestProductAdded.type == 'single' ? latestProductAdded.product.equipment : '' }}
+                                        @for(e of selectedProducts; track e.id){
+                                            <div>{{e.equipment}} ({{e.brand}}) - {{e.price}}</div>
+                                        }
+                                    </div>
+                                    <div>
+                                        {{ latestProductAdded.type == 'single' ?latestProductAdded.product.price : selectedProductsDetails.totalPrice }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                               
+                       
+                        <!-- <div class="font-medium text-lg my-3 text-900">
+                            {{ latestProductAdded.product.brand }}
+                        </div>
+                        <div class="font-medium text-lg my-3 text-900">
+                            {{ latestProductAdded.product.price }}
+                        </div> -->
+                        <!-- <p-button size="small" label="Undo"  /> -->
+                    </div>
+                </ng-template>
+        </p-toast>
         <!-- <app-sidecart [shouldOpenSideCart]="shouldOpenSideCart()"></app-sidecart> -->
     </div>
 </div>

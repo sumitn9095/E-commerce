@@ -8,27 +8,33 @@ import { PanelModule } from 'primeng/panel';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { SkeletonModule } from 'primeng/skeleton';
 import { TableModule } from 'primeng/table';
-import { filter, from, map, Observable, shareReplay } from 'rxjs';
-import { CourseService } from '../../../course.service';
+import { concatMap, filter, from, map, Observable, of, shareReplay, switchMap, tap } from 'rxjs';
+import { CourseService } from '../../utility/course.service';
 import { AsyncPipe } from '@angular/common';
 import { NgFor } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { ShoppingListComponent } from '../shopping-list/shopping-list.component';
 
 @Component({
   selector: 'app-shopping-list-rxjs',
   standalone: true,
-  imports: [FormsModule, ReactiveFormsModule,ButtonModule, PanelModule, TableModule, SkeletonModule, ProgressSpinnerModule, InputGroupAddonModule, InputGroupModule, AsyncPipe, NgFor],
+  imports: [ShoppingListComponent,FormsModule, ReactiveFormsModule,ButtonModule, PanelModule, TableModule, SkeletonModule, ProgressSpinnerModule, InputGroupAddonModule, InputGroupModule, AsyncPipe, NgFor],
   templateUrl: './shopping-list-rxjs.component.html',
   styleUrl: './shopping-list-rxjs.component.scss'
 })
 export class ShoppingListRxjsComponent implements OnInit {
-  public buyProductsForm!: FormGroup;
-  _fb = inject(FormBuilder);
-  public addToCart_output = output();
-  public addProduct_output = output();
+  // public buyProductsForm!: FormGroup;
+  // _fb = inject(FormBuilder);
+  public addToCart_output2 = output();
+  public addProduct_output2 = output();
 
   public products$ : Observable<any> = new Observable();
   public productsCopy$ : Observable<any> = new Observable();
+
+  public discountProductsO : Observable<number> = new Observable();
+  public discountProducts : number[] = [3,5,6];
+
+  public inventoryProducts$ : Observable<any> = new Observable();
 
   public products_array : any[] = [];
 
@@ -36,28 +42,67 @@ export class ShoppingListRxjsComponent implements OnInit {
 
   _cs = inject(CourseService);
 
-  constructor(){
-    this.buyProductsForm = this._fb.group({
-      selectedAny : ['',[Validators.required]],
-    });
-  }
+  // constructor(){
+  //   this.buyProductsForm = this._fb.group({
+  //     selectedAny : ['',[Validators.required]],
+  //   });
+  // }
 
   ngOnInit(): void {
     this.fetch_products();
+    this.discounted_products();
   }
 
   addToCart(){
-    this.addToCart_output.emit(this.selectedProducts);
+    this.addToCart_output2.emit(this.selectedProducts);
   }
   addProduct(product:any){
-    this.addProduct_output.emit(product);
+    this.addProduct_output2.emit(product);
   }
 
+
+  // discounted_products() {
+  //   this._cs.fetchProducts()
+  //   .pipe(
+  //       map((k:any) => k?.body),
+  //       switchMap((e:any) => from(this.discountProducts).pipe(
+  //         map((g:any)=> e[g])
+  //       ))
+  //   )
+  //   .subscribe({
+  //     next: (r:any)=>console.log('products - discounted',r)
+  //   })
+  // }
+
+  discounted_products() {
+    from(this.discountProducts).pipe(
+      switchMap((b:any)=> this._cs.fetchProducts().pipe(
+        map((d:any) => d?.body?.filter((q:any)=>q.no == b))
+      ))
+      // map((r:any)=>r)
+    )
+    .subscribe({
+      next: (r:any)=>console.log('products - discounted',r)
+    })
+  }
+
+  inventory_products(prod:{}) {
+      // console.log("product",prod);
+      // of(1,2,3).pipe(
+      //   concatMap((e:any) => e)
+      //   // map((e:any) => console.log("inventory_products",e))
+      // )
+  }
   
   fetch_products() {
+    this.discountProductsO = from(this.discountProducts);
+    
     this._cs.fetchProducts()
     .pipe(
-        filter((k:any) => k?.body?.map((r:any)=>r.price = Math.random()*1000)),
+        filter((k:any) => k?.body?.map((r:any, i:number) => {
+          r.price = Math.random()*1000;
+          r.no = i+1;
+        })),
         // Iterate each product, and check price with condition
         //map((t:any)=>t.body.filter((q:any)=> q.price < 200))
         map((t:any)=>t?.body),

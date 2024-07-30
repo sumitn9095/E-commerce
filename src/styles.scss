@@ -18,3 +18,10 @@
 .p-sidebar-right {
     width: 34rem;
 }
+
+
+.p-toast {
+    .p-toast-icon-close {
+        position: absolute; top:0; right:0;
+    }
+}

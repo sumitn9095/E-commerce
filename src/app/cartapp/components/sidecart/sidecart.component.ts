@@ -20,7 +20,7 @@ import { Observable } from 'rxjs';
 export class SidecartComponent implements OnInit {
   _cart = inject(CartService);
   detectChange = input(false);
-  
+  cart = input<any[]>([]);
   // shouldOpenSideCart = model<boolean>(false);
   // uuu : Observable<boolean> = new Observable();
   //rrr : boolean = false;
@@ -33,9 +33,17 @@ export class SidecartComponent implements OnInit {
    aaa = computed(() => `This is updated : ${this.detectChange()} and displayed`)
    isTrueSet : boolean = false;
 
-  constructor(){
+    cartPrice = computed(() => Math.round(this.calcCartPrice()));
+    totalQty = computed(() => this.cart().reduce((acc:any, item:any)=> parseInt(acc + item?.qty),0));
+    gst = computed(() => Math.round(this.cartPrice() * 18) / 100);
+    deliveryCharges = computed(() => this.cartPrice() > 500 ? 0 : 100);
+    cartTotalPrice = computed(() => this.cartPrice() + this.gst() + this.deliveryCharges());
+
+  constructor() {
     effect(()=>{
       this.isTrueSet = (!this.detectChange());
+      //this.calcCartDetails();
+    // },{allowSignalWrites: true})
     })
   }
 
@@ -53,6 +61,23 @@ export class SidecartComponent implements OnInit {
     //   }
     // })
   }
+
+  calcCartPrice = () => {
+    return this.cart().reduce((acc:any, item:any) => {
+      let totalIndividualProductPrice:number = item?.qty * parseInt(item?.price);
+      return parseInt(acc + totalIndividualProductPrice);
+    },0);
+  }
+
+  // calcCartDetails = () => {
+  //   let getCalcCartPrice = this.calcCartPrice();
+  //   console.log("cart--Price--Update",getCalcCartPrice);
+  //   this._cart.cartPrice.update(computed(() => getCalcCartPrice));
+  //   this._cart.totalQty.update(computed(() => this.cart().reduce((acc:any, item:any)=> parseInt(acc + item?.qty),0)));
+  //   this._cart.gst.update( computed(() => Math.round(this._cart.cartPrice() * 18) / 100) );
+  //   this._cart.deliveryCharges.update( computed(() => this._cart.cartPrice() > 500 ? 0 : 100));
+  //   this._cart.cartTotalPrice.update( computed(() => this._cart.cartPrice() + this._cart.gst() + this._cart.deliveryCharges()));
+  // }
 
   // ngOnChanges(changes: SimpleChanges): void {
   //   console.log("SimpleChanges",changes)

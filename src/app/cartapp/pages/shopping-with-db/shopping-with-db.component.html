@@ -1,0 +1,11 @@
+<app-header [firstName]="_cart.firstName()" [lastName]="_cart.lastName()" (outputSideCart)="processOutputSideCart($event)" [cartQty]="_cart.totalQty()"></app-header>
+
+<div class="">
+    <div class="m-3 sm:w-8/12 mx-auto">
+
+        <app-shopping-list-db></app-shopping-list-db>
+
+        <app-sidecart [detectChange]="_cart.onDetectChangeSideCart()" [cart]="thisCart()"></app-sidecart>
+
+    </div>
+</div>

@@ -1,0 +1,50 @@
+<form [formGroup]="productsFilterGroup">
+    maxProductPrice -- {{maxProductPrice()}}
+    <div class="flex justify-between items-center gap-10">
+        <div>
+            <p-autoComplete 
+                [(ngModel)]="selectedCategory"
+                [suggestions]="categoryList" 
+                [placeholder]="'All'"
+                (completeMethod)="filterMethodCategory($event)"
+                (onSelect)="filterProducts()"
+                [dropdown]="true"
+                formControlName="category"
+                styleClass="btn-sm"
+            />
+        </div>
+        <div>
+            <p-autoComplete 
+                [(ngModel)]="selectedInstock"
+                [suggestions]="instockList" 
+                [placeholder]="'True'"
+                (completeMethod)="filterMethodInstock($event)"
+                (onSelect)="filterProducts()"
+                [dropdown]="true"
+                formControlName="instock"
+            />
+        </div>
+        <div>
+            <p-inputGroup>
+                <input title="Price From" type="number" pInputText formControlName="priceFrom" [value]="priceFrom" readonly />
+                <input title="Price To" type="number" pInputText formControlName="priceTo" [value]="priceTo" [defaultValue]="maxProductPrice()" readonly />
+            </p-inputGroup>
+            <p-slider [(ngModel)]="rangeValues"
+                [range]="true"
+                styleClass="w-60"
+                formControlName="price" 
+                (onChange)="displayPriceStatus($event)"
+                (onSlideEnd)="filterProducts()"
+            />
+        </div>
+        <div class="card flex justify-content-center">
+            <label for="buttondisplay" class="font-bold block mb-2">Date Range</label>
+            <p-calendar 
+                [(ngModel)]="rangeDates" 
+                selectionMode="range" 
+                formControlName="date"
+                (onClose)="filterProducts()"
+                [readonlyInput]="true" />
+        </div>
+    </div>
+</form>

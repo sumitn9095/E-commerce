@@ -1,0 +1,118 @@
+<!-- <a (click)="filter_products('lessThan',300);">Cheap</a>
+<a (click)="filter_products('moreThan',700);">Expensive</a>
+<a (click)="filter_products('all',0);">Reset</a> -->
+
+<div class="card flex justify-content-center">
+    <!-- <form [formGroup]="productsFilterGroup">
+        <div class="flex justify-between items-center gap-10">
+            <div>
+                <p-autoComplete 
+                    [(ngModel)]="selectedCategory"
+                    [suggestions]="categoryList" 
+                    [placeholder]="'All'"
+                    (completeMethod)="filterMethodCategory($event)"
+                    (onSelect)="filterProducts()"
+                    [dropdown]="true"
+                    formControlName="category"
+                    styleClass="btn-sm"
+                />
+            </div>
+            <div>
+                <p-autoComplete 
+                    [(ngModel)]="selectedInstock"
+                    [suggestions]="instockList" 
+                    [placeholder]="'True'"
+                    (completeMethod)="filterMethodInstock($event)"
+                    (onSelect)="filterProducts()"
+                    [dropdown]="true"
+                    formControlName="instock"
+                />
+            </div>
+            <div>
+                <p-inputGroup>
+                    <input title="Price From" type="number" pInputText formControlName="priceFrom" [value]="priceFrom" readonly />
+                    <input title="Price To" type="number" pInputText formControlName="priceTo" [value]="priceTo" [placeholder]="maxProductPrice" readonly />
+                </p-inputGroup>
+                <p-slider [(ngModel)]="rangeValues"
+                    [range]="true"
+                    styleClass="w-60"
+                    formControlName="price" 
+                    (onChange)="displayPriceStatus($event)"
+                    (onSlideEnd)="filterProducts()"
+                />
+            </div>
+            <div class="card flex justify-content-center">
+                <label for="buttondisplay" class="font-bold block mb-2">Date Range</label>
+                <p-calendar 
+                    [(ngModel)]="rangeDates" 
+                    selectionMode="range" 
+                    formControlName="date"
+                    (onClose)="filterProducts()"
+                    [readonlyInput]="true" />
+            </div>
+        </div>
+    </form> -->
+
+    <app-shopping-filters [categoryListDefined]="categoryListDefined" [maxProductPrice]="maxProductPrice" ></app-shopping-filters>
+</div>
+
+<p-panel header="Header">
+        @defer (on viewport; prefetch on timer(0)) {
+            <div class="form-group">
+                <form [formGroup]="buyProductsForm">
+                    <input type="checkbox" class="" placeholder="selectedAny" name="selectedAny" formControlName="selectedAny"  />
+                    <div class="flex items-start justify-center">
+                        <div class="w-full mx-auto">
+                            <div class="card">
+                                <button type="button" (click)="addToCart()">Buy</button>
+                                <p-table [value]="products.products" [(selection)]="selectedProducts" dataKey="id" [tableStyle]="{'min-width': '50rem'}">
+                                    <ng-template pTemplate="header">
+                                        <tr>
+                                            <th style="width: 4rem">
+                                                <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+                                            </th>
+                                            <th>Id</th>
+                                            <th>Name</th>
+                                            <th>Category</th>
+                                            <th>InStock</th>
+                                            <th>Price</th>
+                                            <th>Manufacturing Date</th>
+                                            <th>Expiry Date</th>
+                                        </tr>
+                                    </ng-template>
+                                    <ng-template pTemplate="body" let-product>
+                                        <tr >
+                                            <td>
+                                                <p-tableCheckbox [value]="product"></p-tableCheckbox>
+                                            </td>
+                                            <td>{{product.id}}</td>
+                                            <td>{{product.name}}</td>
+                                            <td>{{product.category}}</td>
+                                            <td>{{product.instock}}</td>
+                                            <td>{{product.price}}</td>
+                                            <td>{{product.md}}</td>
+                                            <td>{{product.ed}}</td>
+                                            <td>
+                                                <p-button severity="success" (click)="addProduct(product)" > + </p-button>
+                                            </td>
+                                        </tr>
+                                    </ng-template>
+                                </p-table>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        } @placeholder {
+            <div></div>
+        } @loading {
+            <p-progressSpinner></p-progressSpinner>
+            <div>
+                <p-skeleton styleClass="mb-2"></p-skeleton>
+                <p-skeleton styleClass="mb-2"></p-skeleton>
+                <p-skeleton styleClass="mb-2"></p-skeleton>
+            </div>
+        } @error {
+            <i class="pi pi-search" style="font-size: 2rem"></i>
+        }
+</p-panel>
