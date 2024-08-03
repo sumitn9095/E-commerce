@@ -7,7 +7,9 @@ import { HttpRequest, HttpClient, HttpResponse } from '@angular/common/http';
 })
 export class ShopService {
   _http = inject(HttpClient);
+  user:any = JSON.parse(sessionStorage.getItem("shop_user_details") as any);
   constructor() { }
+
 
   fetchCart(){
     let user = 'sumit';
@@ -36,4 +38,20 @@ export class ShopService {
     return this._http.request(maxProductPriceQuery);
   }
 
+  //--------------------------------------
+
+  product_add(productId:number){
+    let payload = {email: this.user.email, productId};
+    return this._http.post<any>(`${environment.mongodb_api_url}addProductToOrder`,payload);
+  }
+
+  addProductToOrderedProducts(id:number, qty:number){
+    let payload = {email:this.user.email, orderId:this.user.orderId, id, qty};
+    return this._http.post<any>(`${environment.mongodb_api_url}addProductToOrderedProducts`,payload);
+  }
+
+  fetch_orderedProducts() {
+    let payload = {email:this.user.email};
+    return this._http.post<any>(`${environment.mongodb_api_url}fetch_orderedProducts`,payload);
+  }
 }

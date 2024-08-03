@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, effect, inject, input, OnInit, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, EventEmitter, inject, input, OnInit, Output, output } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { InputGroupModule } from 'primeng/inputgroup';
@@ -22,7 +22,7 @@ export class ShoppingFiltersComponent implements OnInit {
 
   public maxProductPrice:any = input<any>(0);
   public categoryListDefined:any = input<any>([]);
-  public payloadShoppingFilterValue= output<{}>({});
+  @Output() payloadShoppingFilterValue = new EventEmitter<any>();
 
   public productsFilterGroup!: FormGroup;
 
@@ -79,7 +79,7 @@ export class ShoppingFiltersComponent implements OnInit {
 
     this.payloadShoppingFilterValue.emit(payload);
 
-    //console.log("filterProducts -- payload",payload);
+    console.log("filterProducts -- payload",payload);
     // this._shop.filterProducts(payload)
     // .subscribe({
     //   next: (products)=>{

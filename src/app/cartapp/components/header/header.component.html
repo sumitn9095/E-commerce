@@ -5,11 +5,14 @@
             <ng-template pTemplate="start">
                 <div class="flex align-items-center gap-2">
                     <i class="pi pi-cart-plus" style="font-size: 2rem"></i>
-                    <span class="font-bold text-bluegray-50">{{ _cart.firstName() === '' ? _cart.firstName() :  firstName()}} {{ _cart.lastName() === '' ? _cart.lastName() : lastName() }}</span>
+                    <!-- <span class="font-bold text-bluegray-50">{{ _cart.firstName() === '' ? _cart.firstName() :  firstName()}} {{ _cart.lastName() === '' ? _cart.lastName() : lastName() }}</span> -->
                 </div>
             </ng-template>
             <ng-template pTemplate="end">
                 <!-- {{_cart.sideCartOpen()}} -- _cart.sideCartOpen -->
+                <div class="card flex justify-content-center">
+                    <i class="pi pi-user text-3xl" (click)="_auth.signout()" ></i>
+                </div>
                 <div class="card flex justify-content-center">
                     <i class="pi pi-cart-plus text-3xl" pBadge [value]="cartQty()" (click)="_cart.toggleSideCartPanel()" ></i>
                 </div>
@@ -21,7 +24,6 @@
                     </p-overlayPanel>
                     <i class="pi pi-cart-plus text-3xl" pBadge [value]="totalQty()"  (click)="op.toggle($event)"></i>
                 </div> -->
-
             </ng-template>
         </p-toolbar>
     </div>

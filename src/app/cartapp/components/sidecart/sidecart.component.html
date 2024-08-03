@@ -8,7 +8,8 @@
                         <div>Total Items: {{totalQty()}}</div>
                         @for(item of _cart.cart(); track item.name) {
                             <div class="col-12">
-                                <app-product-display-big [item]="item" (evt)="updateCart($event)"></app-product-display-big>
+                                <!-- <app-product-display-big [item]="item" (evt)="updateCart($event)"></app-product-display-big> -->
+                                <app-product-display-big-db [item]="item" (evt)="updateCart($event)"></app-product-display-big-db>
                             </div>
                         }
                         <div>Sub Total: {{cartPrice()}}</div>

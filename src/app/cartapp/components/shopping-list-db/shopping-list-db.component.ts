@@ -33,18 +33,7 @@ export class ShoppingListDbComponent implements OnInit {
 
   // public selectedCategory:any[]=[];
   public categoryListDefined:any=[];
-  // public categoryList:any=[];
-
-  // public selectedInstock:any[]=[];
-  // public instockList:any=[true,false];
-
-  // public filterPayload:{}={};
-
-  // public priceFrom:number=0;
-  // public priceTo:number=0;
-
-  // rangeValues: number[] = [20, 80];
-  // rangeDates: Date[] | undefined;
+ 
 
   maxProductPrice:number = 0;
 
@@ -90,7 +79,7 @@ export class ShoppingListDbComponent implements OnInit {
     //
   }
 
-  fetch_products(){
+  fetch_products() {
     this._shop.fetchAllProducts().subscribe({
       next:(products)=>{
         if(products instanceof HttpResponse){
@@ -105,32 +94,19 @@ export class ShoppingListDbComponent implements OnInit {
     })
   }
 
-
   filterProductsGroupStatus(){
     return this.productsFilterGroup.value;
   }
 
-
   filterPrice(data:any){
     console.log("filterPrice",data)
   }
-  // displayPriceStatus(data:any){
-  //   let displayPriceFrom = data.values[0];
-  //   let displayPriceTo = data.values[1];
-  //   this.priceFrom = (displayPriceFrom * this.maxProductPrice) / 100;
-  //   this.priceTo = (displayPriceTo * this.maxProductPrice) / 100;
-  // }
-
+  
   filterProducts(payload:{}) {
-    //let payload = {}
-    // let payload = this.filterProductsGroupStatus();
-    // payload.priceFrom = this.priceFrom;
-    // payload.priceTo = this.priceTo;
-    console.log("payload",payload);
     this._shop.filterProducts(payload)
     .subscribe({
       next: (products)=>{
-        if(products instanceof HttpResponse){
+        if(products instanceof HttpResponse) {
           this.products = products.body;
         }
       },
@@ -140,18 +116,6 @@ export class ShoppingListDbComponent implements OnInit {
     })
   }
 
-  // filterMethodCategory(event:any) {
-  //   console.log("event.query",event);
-  //   let cl = [];
-  //   cl = this.categoryListDefined.categories;
-  //   console.log("cl",cl)
-  //   this.categoryList = [...cl];
-  // }
-
-  // filterMethodInstock(event:any) {
-  //   console.log("event.query",event)
-  //   this.instockList = [...this.instockList];
-  // }
 
   getMaxProductPrice(){
     this._shop.getMaxProductPrice().subscribe({

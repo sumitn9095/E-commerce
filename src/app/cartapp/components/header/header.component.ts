@@ -3,7 +3,7 @@ import { SkeletonModule } from 'primeng/skeleton';
 import { ToolbarModule } from 'primeng/toolbar';
 import { CartService } from '../../utility/cart.service';
 import { BadgeModule } from 'primeng/badge';
-
+import { AuthService } from '../../pages/auth/auth.service';
 @Component({
   selector: 'app-header',
   standalone: true,
@@ -14,8 +14,9 @@ import { BadgeModule } from 'primeng/badge';
 })
 export class HeaderComponent {
   _cart = inject(CartService);
-  firstName = model<string>();
-  lastName = model<string>();
+  _auth = inject(AuthService)
+  // firstName = model<string>();
+  // lastName = model<string>();
   cartQty = input('');
   outputSideCart = output<boolean>();
   constructor(){}

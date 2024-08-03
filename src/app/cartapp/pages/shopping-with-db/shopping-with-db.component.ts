@@ -14,12 +14,27 @@ import { ShoppingListDbComponent } from '../../components/shopping-list-db/shopp
 import { MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
 import { LatestProduct } from '../../utility/latest-product';
+import { ShopService } from '../../utility/shop.service';
+import { ButtonModule } from 'primeng/button';
+import { PanelModule } from 'primeng/panel';
+import { SkeletonModule } from 'primeng/skeleton';
+import { TableModule } from 'primeng/table';
+import { AutoCompleteModule } from 'primeng/autocomplete';
+import { InputTextModule } from 'primeng/inputtext';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
+import { InputGroupModule } from 'primeng/inputgroup';
+import { ShoppingFiltersComponent } from '../../components/shopping-filters/shopping-filters.component';
+import { ShoppingListComponent } from '../../components/shopping-list/shopping-list.component';
+import { HttpResponse } from '@angular/common/http';
 
 
 @Component({
   selector: 'app-shopping-with-db',
   standalone: true,
-  imports: [RouterOutlet, HeaderComponent, ShoppingListRxjsComponent, FormsModule, ReactiveFormsModule, SidecartComponent, ToastModule, AsyncPipe, ShoppingListDbComponent],
+  imports: [
+    RouterOutlet, HeaderComponent, ShoppingListRxjsComponent, FormsModule, ReactiveFormsModule, SidecartComponent, ToastModule, AsyncPipe, ShoppingListDbComponent,
+    FormsModule, ShoppingListComponent, ReactiveFormsModule,ButtonModule, PanelModule, TableModule, SkeletonModule, AutoCompleteModule, InputTextModule, ProgressSpinnerModule,  InputGroupAddonModule, InputGroupModule, ShoppingFiltersComponent],
   providers: [MessageService],
   templateUrl: './shopping-with-db.component.html',
   styleUrl: './shopping-with-db.component.scss'
@@ -29,14 +44,17 @@ export class ShoppingWithDbComponent implements OnInit {
   _cart = inject(CartService);
   _cs = inject(CourseService);
   _ms = inject(MessageService);
-  // _fb = inject(FormBuilder)
+  _shop = inject(ShopService)
 
-  thisCart : WritableSignal<any[]> = signal<any[]>([])
+  thisCart : WritableSignal<any> = signal<any>([])
 
   shouldOpenSideCart = signal<boolean>(false);
 
+  categoryListDefined:any=[];
+  maxProductPrice:number=0;
+
   public buyProductsForm!: FormGroup;
-  public products:Signal<any>  = signal({});
+  public products:WritableSignal<any>  = signal({});
   public selectedProducts: any;
   public selectedProductsDetails: any = {}
 
@@ -54,7 +72,10 @@ export class ShoppingWithDbComponent implements OnInit {
   constructor(){}
     
   ngOnInit(): void {
-    // console.log("this.products--",this.products().body);
+    this.fetch_products();
+    this.fetch_cart();
+    this.getCategoryList();
+    this.getMaxProductPrice();
   }
 
   notifyProductAdded() {
@@ -91,30 +112,49 @@ export class ShoppingWithDbComponent implements OnInit {
 
   addProduct(product:any){
     console.log("product added",product);
+    
+    //this.notifyProductAdded();
+
+    // let product_qty_added = product.qty;
+    
+    // this._cart.cart.update(prev => prev.map((p:any) => {
+    //   if(p.id == product.id) {
+    //     product_qty_added = p.qty + 1;
+    //     p.qty = product_qty_added;
+    //     return p;
+    //   } else {
+    //     return p;
+    //   }
+    // }));
+
+    //console.log("this._cart.cart --- single product added",this._cart.cart());
+
     this.addInCartCore(this._cart.cart(), product);
     this.latestProductAdded = {
       type: 'single',
       product: product
     }
-    this.notifyProductAdded();
   }
 
-  addToCart = (selectedProducts:any) => {
-    this.selectedProducts = selectedProducts;
-    selectedProducts.map((g:any) => {
+  addToCart = () => {
+    this.selectedProducts.map((g:any) => {
       console.log("iterate - selectedProducts", g.id)
+      this._shop.addProductToOrderedProducts(g.id, g.qty).subscribe({
+        next: (product2)=>console.log("product added",g),
+        error: (err)=>{throw new Error(err)}
+      })
       if(this._cart.cart().length) {
         this.addInCartCore(this._cart.cart(), g);
       } else {
         g.qty = 1;
-        this._cart.cart.update((k) => [...k, g])
+        this._cart.cart.update((k) => [...k, g]);
       }
     });
     this.latestProductAdded = {
       type: 'multiple',
-      product: selectedProducts
+      product: this.selectedProducts
     }
-    this.notifyProductAdded();
+    //this.notifyProductAdded();
   }
 
   processOutputSideCart(data:boolean){
@@ -125,15 +165,41 @@ export class ShoppingWithDbComponent implements OnInit {
   }
 
   addInCartCore = (cart:any, product:any) => {
-    let kll = cart.some((c:any)=> c.id === product.id);
+    let isProductAlreadyInCart = cart.some((c:any)=> c.id === product.id);
     var cart_temp : Array<any> = cart;
-    if (!kll) {
+
+    let product_qty_added = 1;
+
+    if (!isProductAlreadyInCart) {
+      // -- Product NOT Already in Cart. Product added is NEW
       console.log("not matching")
       product.qty = 1;
       cart_temp.push(product);
+      //this._cart.cart.update(prev => [...prev,product])
     } else {
-      cart_temp.filter((c:any) => { if(c.id === product.id) { c.qty = c.qty + 1 } });
+      // -- Product Already in Cart.
+      
+      cart_temp.map((c:any) => {
+        if(c.id === product.id) {
+          product_qty_added = c.qty + 1;
+
+          // -- Update the product's quantity in Cart Signal.
+          c.qty = product_qty_added;
+        }
+        //return c;
+      });
     }
+
+    // this.thisCart.set([]);
+    // this.thisCart.update(this._cart.cart);
+
+    console.log("this._cart.cart -- after modification",this._cart.cart());
+
+    // -- Update the product's quantity in MongoDB document
+    this._shop.addProductToOrderedProducts(product.id, product_qty_added).subscribe({
+      next: (product2)=>console.log("product added",product),
+      error: (err)=>{throw new Error(err)}
+    })
 
     setTimeout(() => {
       this._cart.cart.set([]);
@@ -142,5 +208,87 @@ export class ShoppingWithDbComponent implements OnInit {
         this.thisCart.update(this._cart.cart);
       }, 200);
     }, 200);
+  }
+
+  fetch_products() {
+    this._shop.fetchAllProducts().subscribe({
+      next:(products)=>{
+        if(products instanceof HttpResponse){
+            this.products.update(()=>products.body)
+            console.log("this.products",this.products);
+        }
+      },
+      error:(err)=>{
+        let error = new Error(err);
+      },
+      complete:()=>{}
+    })
+  }
+
+  fetch_cart(){
+    //fetch_orderedProducts
+    let products:any[]=[];
+    this._shop.fetch_orderedProducts().subscribe({
+      next:(response)=>{
+            
+            response.order.cart.map((order:any)=>{
+              //let obj = {id:product.id, email:product.email,...product.products}
+              sessionStorage.setItem("orderId",order.orderId);
+              products.push({...order.products, qty: order.qty});
+              //products.push(product);
+            })
+
+            this._cart.cart.update(()=>products);
+
+            console.log("this._cart.cart",this._cart.cart());
+      },
+      error:(err)=>{
+        let error = new Error(err);
+      }
+    })
+  }
+
+  filterProducts(payload:{}) {
+    this._shop.filterProducts(payload)
+    .subscribe({
+      next: (products)=>{
+        if(products instanceof HttpResponse) {
+          this.products.update(() => products.body);
+        }
+      },
+      error: (err)=>{
+        console.log("Error",err);
+      }
+    })
+  }
+
+  getCategoryList(){
+    this._shop.getCategoryList().subscribe({
+      next:(categories)=>{
+        if(categories instanceof HttpResponse){
+          this.categoryListDefined = categories.body;
+        }
+      },
+      error:(err)=>{
+        let error = new Error(err);
+      },
+      complete:()=>{}
+    })
+  }
+
+  getMaxProductPrice(){
+    this._shop.getMaxProductPrice().subscribe({
+      next: (maxProduct:any) => {
+        if(maxProduct instanceof HttpResponse) {
+          let maxProductPrice = maxProduct.body;
+          this.maxProductPrice = maxProductPrice.product[0].price;
+          console.log("maxProductPrice",maxProductPrice);
+          //this.rangeValues = [0,maxProductPrice.product[0].price]
+        }
+      },
+      error: (err:Error)=>{
+        //ssssssss
+      }
+    })
   }
 }

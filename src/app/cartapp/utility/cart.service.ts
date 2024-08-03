@@ -19,7 +19,7 @@ export class CartService {
   public gst = signal(0);
   public deliveryCharges = signal(0);
   public cartTotalPrice = signal(0);
-  public cart: WritableSignal<any> = signal([])
+  public cart: WritableSignal<any> = signal<any>([])
 
   public firstName:WritableSignal<any> = signal<any>('First Name');
   public lastName:WritableSignal<any> = signal<any>('Last Name');

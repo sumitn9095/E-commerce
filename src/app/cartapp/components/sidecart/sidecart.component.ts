@@ -6,11 +6,12 @@ import { ProductDisplayBigComponent } from '../product-display-big/product-displ
 import { toSignal } from '@angular/core/rxjs-interop';
 import { AsyncPipe } from '@angular/common';
 import { Observable } from 'rxjs';
+import { ProductDisplayBigDbComponent } from "../product-display-big-db/product-display-big-db.component";
 
 @Component({
   selector: 'app-sidecart',
   standalone: true,
-  imports: [SidebarModule,DataViewModule,ProductDisplayBigComponent, AsyncPipe],
+  imports: [SidebarModule, DataViewModule, ProductDisplayBigComponent, AsyncPipe, ProductDisplayBigDbComponent],
   providers: [],
   templateUrl: './sidecart.component.html',
   styleUrl: './sidecart.component.scss',
@@ -27,20 +28,20 @@ export class SidecartComponent implements OnInit {
   //sideCartOpenSignal : any = false;
   // sss = computed(() => this._cart.sideCartOpen())
   //@Input() shouldOpenSideCart : boolean = false;
+  //sideCartOpenSignal = toSignal(this._cart.sideCartOpen)
 
-   //sideCartOpenSignal = toSignal(this._cart.sideCartOpen)
+  aaa = computed(() => `This is updated : ${this.detectChange()} and displayed`)
+  isTrueSet : boolean = false;
 
-   aaa = computed(() => `This is updated : ${this.detectChange()} and displayed`)
-   isTrueSet : boolean = false;
-
-    cartPrice = computed(() => Math.round(this.calcCartPrice()));
-    totalQty = computed(() => this.cart().reduce((acc:any, item:any)=> parseInt(acc + item?.qty),0));
-    gst = computed(() => Math.round(this.cartPrice() * 18) / 100);
-    deliveryCharges = computed(() => this.cartPrice() > 500 ? 0 : 100);
-    cartTotalPrice = computed(() => this.cartPrice() + this.gst() + this.deliveryCharges());
+  cartPrice = computed(() => Math.round(this.calcCartPrice()));
+  totalQty = computed(() => this.cart().reduce((acc:any, item:any)=> parseInt(acc + item?.qty),0));
+  gst = computed(() => Math.round(this.cartPrice() * 18) / 100);
+  deliveryCharges = computed(() => this.cartPrice() > 500 ? 0 : 100);
+  cartTotalPrice = computed(() => this.cartPrice() + this.gst() + this.deliveryCharges());
 
   constructor() {
     effect(()=>{
+      console.log("this.cart()------",this.cart())
       this.isTrueSet = (!this.detectChange());
       //this.calcCartDetails();
     // },{allowSignalWrites: true})

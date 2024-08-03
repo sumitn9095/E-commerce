@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { HttpClientModule } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { TableComponent } from './table.component';
 import { NgxPaginationModule } from 'ngx-pagination'; 
 
@@ -9,9 +9,10 @@ describe('TableComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ TableComponent ],
-      imports: [HttpClientModule, NgxPaginationModule]
-    })
+    declarations: [TableComponent],
+    imports: [NgxPaginationModule],
+    providers: [provideHttpClient(withInterceptorsFromDi())]
+})
     .compileComponents();
   });
 
