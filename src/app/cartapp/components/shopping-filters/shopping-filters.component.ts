@@ -97,8 +97,8 @@ export class ShoppingFiltersComponent implements OnInit {
     console.log("event.query",event);
     let cl = [];
     cl = this.categoryListDefined().categories;
-    console.log("cl",cl)
-    this.categoryList = [...cl];
+    //.log("cl",cl)
+    this.categoryList = ['All',...cl];
   }
 
   filterMethodInstock(event:any) {

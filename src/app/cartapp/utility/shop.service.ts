@@ -8,6 +8,7 @@ import { HttpRequest, HttpClient, HttpResponse } from '@angular/common/http';
 export class ShopService {
   _http = inject(HttpClient);
   user:any = JSON.parse(sessionStorage.getItem("shop_user_details") as any);
+  orderId:any = sessionStorage.getItem("shop_orderId");
   constructor() { }
 
 
@@ -37,7 +38,6 @@ export class ShopService {
     let maxProductPriceQuery = new HttpRequest("GET",`${environment.mongodb_api_url}getMaxProductPrice`);
     return this._http.request(maxProductPriceQuery);
   }
-
   //--------------------------------------
 
   product_add(productId:number){
@@ -46,12 +46,22 @@ export class ShopService {
   }
 
   addProductToOrderedProducts(id:number, qty:number){
-    let payload = {email:this.user.email, orderId:this.user.orderId, id, qty};
+    let payload = {email:this.user.email, orderId:this.orderId, id, qty};
     return this._http.post<any>(`${environment.mongodb_api_url}addProductToOrderedProducts`,payload);
   }
 
-  fetch_orderedProducts() {
+  fetch_orderedProducts(payload:{}) {
+    let payloadObj = {email:this.user.email, orderId:this.orderId, payload};
+    return this._http.post<any>(`${environment.mongodb_api_url}fetch_orderedProducts`, payloadObj);
+  }
+
+  fetch_orderId() {
     let payload = {email:this.user.email};
-    return this._http.post<any>(`${environment.mongodb_api_url}fetch_orderedProducts`,payload);
+    return this._http.post<any>(`${environment.mongodb_api_url}fetch_orderId`,payload);
+  }
+
+  cartCheckout() {
+    let payloadObj = {email:this.user.email, orderId:this.orderId};
+    return this._http.post<any>(`${environment.mongodb_api_url}cartCheckout`, payloadObj);
   }
 }

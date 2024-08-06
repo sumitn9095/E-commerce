@@ -14,11 +14,11 @@ import { AuthService } from '../../pages/auth/auth.service';
 })
 export class HeaderComponent {
   _cart = inject(CartService);
-  _auth = inject(AuthService)
+  _auth = inject(AuthService);
   // firstName = model<string>();
   // lastName = model<string>();
   cartQty = input('');
-  outputSideCart = output<boolean>();
+  outputSideCart = output<any>();
   constructor(){}
 
 }

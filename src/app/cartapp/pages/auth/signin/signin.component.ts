@@ -35,17 +35,18 @@ export class SigninComponent implements OnInit {
     });
   }
 
+
   signin(){
     let payload = this.studentRegForm.value;
     this._auth.signin(payload)
       .subscribe({
         next: (user)=>{
-            console.log("user >>",user);
+            //console.log("user >>",user);
           if(user.err && user.err.errors.name) {
-            console.log("user error");
+            //console.log("user error");
             this._ms.add({ severity: 'error', summary: `${user.err.message}` });
           } else {
-            console.log("user signedin");
+            //console.log("user signedin");
             this._ms.add({ severity: 'success', summary: `Hello, ${user.user.name}. Welcome to the Shop.`, detail: `You can now go product shopping.` });
             sessionStorage.setItem("shop_token",user.token);
             sessionStorage.setItem("shop_user_details",JSON.stringify(user.user));

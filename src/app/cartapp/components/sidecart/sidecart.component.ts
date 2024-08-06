@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, Input, input, model, OnInit, Signal, signal, SimpleChanges, WritableSignal, effect } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, Input, input, model, OnInit, Signal, signal, SimpleChanges, WritableSignal, effect, output } from '@angular/core';
 import { CartService } from '../../utility/cart.service';
 import { SidebarModule } from 'primeng/sidebar';
 import { DataViewModule } from 'primeng/dataview';
@@ -7,11 +7,16 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { AsyncPipe } from '@angular/common';
 import { Observable } from 'rxjs';
 import { ProductDisplayBigDbComponent } from "../product-display-big-db/product-display-big-db.component";
+import { ShopService } from '../../utility/shop.service';
+import { ShoppingFiltersComponent } from '../shopping-filters/shopping-filters.component';
+import { HttpResponse } from '@angular/common/http';
+import { DialogModule } from 'primeng/dialog';
+import { ButtonModule } from 'primeng/button';
 
 @Component({
   selector: 'app-sidecart',
   standalone: true,
-  imports: [SidebarModule, DataViewModule, ProductDisplayBigComponent, AsyncPipe, ProductDisplayBigDbComponent],
+  imports: [SidebarModule, DataViewModule, ProductDisplayBigComponent, AsyncPipe, ProductDisplayBigDbComponent, ShoppingFiltersComponent, DialogModule, ButtonModule],
   providers: [],
   templateUrl: './sidecart.component.html',
   styleUrl: './sidecart.component.scss',
@@ -19,9 +24,17 @@ import { ProductDisplayBigDbComponent } from "../product-display-big-db/product-
 })
 
 export class SidecartComponent implements OnInit {
+  _shop = inject(ShopService)
   _cart = inject(CartService);
   detectChange = input(false);
   cart = input<any[]>([]);
+  orderId = input<string>("");
+  filterQuery = output<any>();
+  showReviewCartModal:boolean=false
+
+  categoryListDefined = input<any[]>([])
+  maxProductPrice = input<number>(0);
+
   // shouldOpenSideCart = model<boolean>(false);
   // uuu : Observable<boolean> = new Observable();
   //rrr : boolean = false;
@@ -33,6 +46,7 @@ export class SidecartComponent implements OnInit {
   aaa = computed(() => `This is updated : ${this.detectChange()} and displayed`)
   isTrueSet : boolean = false;
 
+  //thiscart = computed(() => this.cart());
   cartPrice = computed(() => Math.round(this.calcCartPrice()));
   totalQty = computed(() => this.cart().reduce((acc:any, item:any)=> parseInt(acc + item?.qty),0));
   gst = computed(() => Math.round(this.cartPrice() * 18) / 100);
@@ -41,10 +55,10 @@ export class SidecartComponent implements OnInit {
 
   constructor() {
     effect(()=>{
-      console.log("this.cart()------",this.cart())
+      //console.log("this.cart()------",this.cart())
+      console.log("this.categoryListDefined",this.categoryListDefined())
+      console.log("maxProductPrice",this.maxProductPrice())
       this.isTrueSet = (!this.detectChange());
-      //this.calcCartDetails();
-    // },{allowSignalWrites: true})
     })
   }
 
@@ -84,17 +98,35 @@ export class SidecartComponent implements OnInit {
   //   console.log("SimpleChanges",changes)
   // }
 
+  filterProducts(payload:{}) {
+    this.filterQuery.emit(payload);
+  }
 
+  reviewCart(){
+    this.showReviewCartModal = true;
+  }
+
+  checkout(){
+    this._shop.cartCheckout().subscribe({
+      next:()=>{
+        //---
+      },
+      error:()=>{
+        //---
+      }
+    })
+  }
 
   updateCart(product:any) {
-    console.log("Updated Product >> ",product);
-    let klo = this._cart.cart()
-    klo.filter((c:any) => { 
-      if(c.id === product.id) {
-        return c.qty = product.qty
-      }
-    });
-    this._cart.cart.set([]);
-    this._cart.cart.set(klo);
+    this._cart.cart.update(prev => prev.map((c:any)=>{
+      if(c.id === product.id) c.qty = product.qty
+      return c
+    }))
+
+    this._shop.addProductToOrderedProducts(product.id, product.qty).subscribe({
+      next: (product2)=>console.log("Updated Product >> ",product),
+      error: (err)=>{throw new Error(err)}
+    })
+    console.log("this._cart.cart------",this._cart.cart())
   }
 }

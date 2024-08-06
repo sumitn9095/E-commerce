@@ -47,6 +47,8 @@ export class ShoppingWithDbComponent implements OnInit {
   _shop = inject(ShopService)
 
   thisCart : WritableSignal<any> = signal<any>([])
+  //thisCart = computed( () => this._cart.cart() );
+  orderId:any = sessionStorage.getItem("shop_orderId")?.toString();
 
   shouldOpenSideCart = signal<boolean>(false);
 
@@ -76,6 +78,7 @@ export class ShoppingWithDbComponent implements OnInit {
     this.fetch_cart();
     this.getCategoryList();
     this.getMaxProductPrice();
+   
   }
 
   notifyProductAdded() {
@@ -138,17 +141,18 @@ export class ShoppingWithDbComponent implements OnInit {
 
   addToCart = () => {
     this.selectedProducts.map((g:any) => {
-      console.log("iterate - selectedProducts", g.id)
-      this._shop.addProductToOrderedProducts(g.id, g.qty).subscribe({
-        next: (product2)=>console.log("product added",g),
-        error: (err)=>{throw new Error(err)}
-      })
-      if(this._cart.cart().length) {
-        this.addInCartCore(this._cart.cart(), g);
-      } else {
-        g.qty = 1;
-        this._cart.cart.update((k) => [...k, g]);
-      }
+      //console.log("iterate - selectedProducts", g.id);
+      this.addInCartCore(this._cart.cart(), g);
+      // this._shop.addProductToOrderedProducts(g.id, g.qty).subscribe({
+      //   next: (product2)=>console.log("product added",g),
+      //   error: (err)=>{throw new Error(err)}
+      // })
+      // if(this._cart.cart().length) {
+      //   this.addInCartCore(this._cart.cart(), g);
+      // } else {
+      //   g.qty = 1;
+      //   this._cart.cart.update((k) => [...k, g]);
+      // }
     });
     this.latestProductAdded = {
       type: 'multiple',
@@ -166,50 +170,51 @@ export class ShoppingWithDbComponent implements OnInit {
 
   addInCartCore = (cart:any, product:any) => {
     let isProductAlreadyInCart = cart.some((c:any)=> c.id === product.id);
-    var cart_temp : Array<any> = cart;
+    //var cart_temp : Array<any> = cart;
 
     let product_qty_added = 1;
 
     if (!isProductAlreadyInCart) {
       // -- Product NOT Already in Cart. Product added is NEW
-      console.log("not matching")
+      //console.log("not matching")
       product.qty = 1;
-      cart_temp.push(product);
-      //this._cart.cart.update(prev => [...prev,product])
+      //cart_temp.push(product);
+      this._cart.cart.update(prev => [...prev,product])
     } else {
       // -- Product Already in Cart.
-      
-      cart_temp.map((c:any) => {
+      this._cart.cart.update(prev => prev.map((c:any) => {
         if(c.id === product.id) {
           product_qty_added = c.qty + 1;
-
           // -- Update the product's quantity in Cart Signal.
           c.qty = product_qty_added;
         }
-        //return c;
-      });
+        return c
+      }));
+
+      // setTimeout(() => {
+      //   this.thisCart.set([]);
+      //     setTimeout(() => {
+      //         this.thisCart.update( computed( () => this._cart.cart() ));
+      //     },200)
+      // },200)
+
+      this.thisCart.set([]);
+      setTimeout(() => {
+          this.thisCart.update( computed( () => this._cart.cart() ));
+      },100)
     }
 
-    // this.thisCart.set([]);
-    // this.thisCart.update(this._cart.cart);
-
-    console.log("this._cart.cart -- after modification",this._cart.cart());
+   /// console.log("this._cart.cart -- after modification",this._cart.cart());
 
     // -- Update the product's quantity in MongoDB document
     this._shop.addProductToOrderedProducts(product.id, product_qty_added).subscribe({
       next: (product2)=>console.log("product added",product),
       error: (err)=>{throw new Error(err)}
     })
-
-    setTimeout(() => {
-      this._cart.cart.set([]);
-      setTimeout(() => {
-        this._cart.cart.set([...cart_temp]);
-        this.thisCart.update(this._cart.cart);
-      }, 200);
-    }, 200);
+   
   }
 
+  // Fetching Products from Display
   fetch_products() {
     this._shop.fetchAllProducts().subscribe({
       next:(products)=>{
@@ -225,21 +230,54 @@ export class ShoppingWithDbComponent implements OnInit {
     })
   }
 
-  fetch_cart(){
-    //fetch_orderedProducts
-    let products:any[]=[];
-    this._shop.fetch_orderedProducts().subscribe({
+  // Filtering Products in Cart
+  filter_cart(payload:{}){
+    var cart_products:any[] = [];
+     this._shop.fetch_orderedProducts(payload).subscribe({
       next:(response)=>{
-            
+          response.order.cart.map((order:any) => {
+            if(order.products !== undefined) cart_products.push({...order.products, qty: order.qty});
+            //cart_products.push({...order.products, qty: order.qty});
+          })
+          this._cart.cart.update(()=>cart_products);
+            this.thisCart.update( computed( () => this._cart.cart() ));
+          console.log("this._cart.cart",this._cart.cart());
+      },
+      error:(err)=>{
+        let error = new Error(err);
+      }
+    })
+  }
+
+  // Fetching Products from Cart
+  fetch_cart(){
+    // Fetch ------------ Order ID ----------------------
+    this._shop.fetch_orderId().subscribe({
+      next:(order)=>{
+        console.log("order >>",order);
+        if(order.order.length) sessionStorage.setItem("shop_orderId",order.order[0].orderId);
+        else {
+          let orderId = Math.random()*38747388948737;
+          sessionStorage.setItem("orderId",orderId.toString());
+        }
+      },
+      error:(err)=>{
+        let error = new Error(err);
+      },
+      complete:()=>{}
+    })
+
+    // Fetch ------------ Order ID ----------------------
+    let cart_products:any[]=[];
+    this._shop.fetch_orderedProducts(false).subscribe({
+      next:(response)=>{
             response.order.cart.map((order:any)=>{
               //let obj = {id:product.id, email:product.email,...product.products}
-              sessionStorage.setItem("orderId",order.orderId);
-              products.push({...order.products, qty: order.qty});
+              cart_products.push({...order.products, qty: order.qty});
               //products.push(product);
             })
-
-            this._cart.cart.update(()=>products);
-
+            this._cart.cart.update(()=>cart_products);
+             this.thisCart.update( computed( () => this._cart.cart() ));
             console.log("this._cart.cart",this._cart.cart());
       },
       error:(err)=>{
@@ -248,6 +286,7 @@ export class ShoppingWithDbComponent implements OnInit {
     })
   }
 
+  // Filtering Products on display
   filterProducts(payload:{}) {
     this._shop.filterProducts(payload)
     .subscribe({

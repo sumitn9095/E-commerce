@@ -2,17 +2,17 @@ import { HttpInterceptorFn } from '@angular/common/http';
 
 export const tokenInterceptor: HttpInterceptorFn = (req, next) => {
   //return next(req);
-
-  let token = sessionStorage.getItem("shop_token");
+  let token;
+  if (typeof window !== undefined && window.sessionStorage) token = sessionStorage.getItem('shop_token');
   let tokenAuth;
-  if(token !== ''){
+  if (token !== '') {
     tokenAuth = req.clone({
       setHeaders: {
-        Authorization: `Bearer ${token}`
-      }
-    })
+        Authorization: `Bearer ${token}`,
+      },
+    });
   } else {
-    tokenAuth = req
+    tokenAuth = req;
   }
-  return next(tokenAuth)
+  return next(tokenAuth);
 };

@@ -7,13 +7,23 @@ import { Router } from '@angular/router';
   providedIn: 'root'
 })
 export class AuthService {
+  user:string | null = null;
   _http = inject(HttpClient);
-  _router = inject(Router)
-  constructor() { }
+  _router = inject(Router);
+  constructor() {
+    setTimeout(() => {
+      this.user = JSON.parse(sessionStorage.getItem("shop_user_details") as string);
+    }, 2200);
+  }
 
   regisgter(payload:{}){
     return this._http.post<any>(`${environment.mongodb_api_url}register`,payload);
   }
+
+  // fetch_orderId() {
+  //   let payload = {email:this.user.email};
+  //   return this._http.post<any>(`${environment.mongodb_api_url}fetch_orderId`,payload);
+  // }
 
   signin(payload:{}){
     return this._http.post<any>(`${environment.mongodb_api_url}signin`,payload);

@@ -1,4 +1,4 @@
-import { Injectable, WritableSignal, signal } from '@angular/core';
+import { Injectable, WritableSignal, computed, signal } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 
 @Injectable({
@@ -20,6 +20,7 @@ export class CartService {
   public deliveryCharges = signal(0);
   public cartTotalPrice = signal(0);
   public cart: WritableSignal<any> = signal<any>([])
+  public temp_cart: WritableSignal<any> = signal<any>([])
 
   public firstName:WritableSignal<any> = signal<any>('First Name');
   public lastName:WritableSignal<any> = signal<any>('Last Name');
@@ -33,6 +34,8 @@ export class CartService {
   toggleSideCartPanel(){
     // this.onDetectChange.set(Math.random()*4);
     this.onDetectChangeSideCart.update(v => !v);
+    this.temp_cart.update(()=>this.cart());
+    this.cart.update(computed(()=>this.temp_cart()));
   }
 
 }
