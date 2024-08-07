@@ -68,9 +68,9 @@
       <i class="pi pi-search"></i>
       }
     </p-panel>
-    <app-sidecart [detectChange]="_cart.onDetectChangeSideCart()" [cart]="thisCart()" [orderId]="orderId"
+    <app-sidecart [detectChange]="_cart.onDetectChangeSideCart()" [cart]="_cart.cart()" [orderId]="orderId"
       [categoryListDefined]="categoryListDefined" [maxProductPrice]="maxProductPrice"
-      (filterQuery)="filter_cart($event)">
+      (filterQuery)="filter_cart($event)" (fetchCartOutput)="fetch_cart()">
     </app-sidecart>
   </div>
 </div>

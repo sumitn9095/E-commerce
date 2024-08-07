@@ -51,7 +51,7 @@ export class ShopService {
   }
 
   fetch_orderedProducts(payload:{}) {
-    let payloadObj = {email:this.user.email, orderId:this.orderId, payload};
+    let payloadObj = {email:this.user.email, orderId:this.orderId, order:"inProgress", payload};
     return this._http.post<any>(`${environment.mongodb_api_url}fetch_orderedProducts`, payloadObj);
   }
 
@@ -63,5 +63,10 @@ export class ShopService {
   cartCheckout() {
     let payloadObj = {email:this.user.email, orderId:this.orderId};
     return this._http.post<any>(`${environment.mongodb_api_url}cartCheckout`, payloadObj);
+  }
+
+  orderInit(orderId:number){
+    let payloadObj = {email:this.user.email, orderId};
+    return this._http.post<any>(`${environment.mongodb_api_url}orderInit`, payloadObj);
   }
 }

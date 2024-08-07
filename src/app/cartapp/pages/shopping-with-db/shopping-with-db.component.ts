@@ -48,8 +48,8 @@ export class ShoppingWithDbComponent implements OnInit {
 
   thisCart : WritableSignal<any> = signal<any>([])
   //thisCart = computed( () => this._cart.cart() );
-  orderId:any = sessionStorage.getItem("shop_orderId")?.toString();
-
+  
+  orderId:any= '';
   shouldOpenSideCart = signal<boolean>(false);
 
   categoryListDefined:any=[];
@@ -169,6 +169,7 @@ export class ShoppingWithDbComponent implements OnInit {
   }
 
   addInCartCore = (cart:any, product:any) => {
+    console.log("this.thisCart",this.thisCart(), this._cart.cart())
     let isProductAlreadyInCart = cart.some((c:any)=> c.id === product.id);
     //var cart_temp : Array<any> = cart;
 
@@ -197,14 +198,12 @@ export class ShoppingWithDbComponent implements OnInit {
       //         this.thisCart.update( computed( () => this._cart.cart() ));
       //     },200)
       // },200)
-
-      this.thisCart.set([]);
-      setTimeout(() => {
-          this.thisCart.update( computed( () => this._cart.cart() ));
-      },100)
+      
     }
 
    /// console.log("this._cart.cart -- after modification",this._cart.cart());
+    
+    this.updateCartInSidecart();
 
     // -- Update the product's quantity in MongoDB document
     this._shop.addProductToOrderedProducts(product.id, product_qty_added).subscribe({
@@ -212,6 +211,18 @@ export class ShoppingWithDbComponent implements OnInit {
       error: (err)=>{throw new Error(err)}
     })
    
+  }
+
+  updateCartInSidecart(){
+    // Just by updating "_cart.cart" signal, doesnt update thee 'sidecart.
+    // 
+    let cart_temp:any = [];
+    cart_temp = this._cart.cart();
+    this._cart.cart.set([]);
+      setTimeout(() => {
+          this._cart.cart.update(() => [...cart_temp]);
+          console.log("this.thisCart",this.thisCart(), this._cart.cart());
+      },100)
   }
 
   // Fetching Products from Display
@@ -253,12 +264,23 @@ export class ShoppingWithDbComponent implements OnInit {
   fetch_cart(){
     // Fetch ------------ Order ID ----------------------
     this._shop.fetch_orderId().subscribe({
-      next:(order)=>{
-        console.log("order >>",order);
-        if(order.order.length) sessionStorage.setItem("shop_orderId",order.order[0].orderId);
-        else {
+      next:(response)=>{
+        console.log("order >>",response.orderDetails);
+        if(response.orderDetails && response.orderDetails.length) {
+          this.orderId = sessionStorage.getItem("shop_orderId")?.toString();
+          sessionStorage.setItem("shop_orderId",response.orderDetails[0].orderId);
+        } else {
           let orderId = Math.random()*38747388948737;
-          sessionStorage.setItem("orderId",orderId.toString());
+          this.orderId = orderId.toString();
+          sessionStorage.setItem("shop_orderId",orderId.toString());
+          this._shop.orderInit(orderId).subscribe({
+            next:(orderDetails)=>{
+              //------
+            },
+            error:(err)=>{
+              let error = new Error(err);
+            },
+          })
         }
       },
       error:(err)=>{

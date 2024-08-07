@@ -5,13 +5,14 @@
     <h3>My Cart ({{totalQty()}})</h3>
     <p class="text-in-a-line" [title]="'Order Id: '+orderId()">Order Id: {{orderId()}}</p>
 
+    @if(cart().length) {
     <app-shopping-filters [categoryListDefined]="categoryListDefined()" [maxProductPrice]="maxProductPrice()"
       (payloadShoppingFilterValue)="filterProducts($event)"></app-shopping-filters>
 
     <p-dataView #dv [value]="cart()">
       <ng-template pTemplate="list">
         <div class="grid grid-nogutter">
-          @for(item of cart(); track item.name) {
+          @for(item of cart(); track item.id) {
           <div class="col-12">
             <!-- <app-product-display-big [item]="item" (evt)="updateCart($event)"></app-product-display-big> -->
             <app-product-display-big-db [item]="item" (evt)="updateCart($event)"></app-product-display-big-db>
@@ -29,18 +30,24 @@
       <p-button (onClick)="reviewCart()" label="Checkout" />
       <p-dialog header="Review Cart" [modal]="true" [(visible)]="showReviewCartModal" [style]="{ width: '50rem' }"
         [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [maximizable]="true">
-        @for(item of cart(); track item.name) {
+        @for(cartItem of cartCopy(); track cartItem.id) {
         <div class="col-12">
-          <app-product-display-big-db [item]="item" [mode]="'read'" (evt)="updateCart($event)">
-          </app-product-display-big-db>
+          <app-product-display-big-db [item]="cartItem" [mode]="'read'"></app-product-display-big-db>
         </div>
         }
-        <div class="flex justify-content-end gap-2">
+        <div>Sub Total: {{cartPrice()}}</div>
+        <div>GST: {{gst()}}</div>
+        <div>Delivery Charges: {{deliveryCharges()}}</div>
+        <div>Cart Total Price: {{cartTotalPrice()}}</div>
+        <div class="flex justify-end gap-2">
           <p-button label="Cancel" severity="secondary" (onClick)="showReviewCartModal = false" />
-          <p-button label="Save" (onClick)="checkout();showReviewCartModal = false" />
+          <p-button label="Proceed" (onClick)="checkout();showReviewCartModal = false" />
         </div>
       </p-dialog>
     </div>
+    } @else {
+    <h3>No items in Cart</h3>
+    }
 
   </p-sidebar>
 </div>

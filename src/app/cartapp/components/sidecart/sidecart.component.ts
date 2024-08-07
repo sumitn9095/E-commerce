@@ -27,22 +27,16 @@ export class SidecartComponent implements OnInit {
   _shop = inject(ShopService)
   _cart = inject(CartService);
   detectChange = input(false);
-  cart = input<any[]>([]);
+  cart = model<any[]>([]);
+  cartCopy:WritableSignal<any> = signal([]);
   orderId = input<string>("");
   filterQuery = output<any>();
+  fetchCartOutput = output<any>();
   showReviewCartModal:boolean=false
 
   categoryListDefined = input<any[]>([])
   maxProductPrice = input<number>(0);
-
-  // shouldOpenSideCart = model<boolean>(false);
-  // uuu : Observable<boolean> = new Observable();
-  //rrr : boolean = false;
-  //sideCartOpenSignal : any = false;
-  // sss = computed(() => this._cart.sideCartOpen())
-  //@Input() shouldOpenSideCart : boolean = false;
-  //sideCartOpenSignal = toSignal(this._cart.sideCartOpen)
-
+  evt = output<any>();
   aaa = computed(() => `This is updated : ${this.detectChange()} and displayed`)
   isTrueSet : boolean = false;
 
@@ -54,6 +48,16 @@ export class SidecartComponent implements OnInit {
   cartTotalPrice = computed(() => this.cartPrice() + this.gst() + this.deliveryCharges());
 
   constructor() {
+    // --- this 'computed' updates cartCopy only initially
+    this.cartCopy.set([])
+    setTimeout(() => {
+      this.cartCopy.update(()=>[...this.cart()]);
+    }, 500);
+
+    // setTimeout(() => {
+    //     this.cartCopy.update( ()=>[...this._cart.cart()] )
+    // }, 300);
+
     effect(()=>{
       //console.log("this.cart()------",this.cart())
       console.log("this.categoryListDefined",this.categoryListDefined())
@@ -103,13 +107,16 @@ export class SidecartComponent implements OnInit {
   }
 
   reviewCart(){
+    //this.cart.update(()=>[...this._cart.cart()] )
+    console.log("this.cart",this.cart())
     this.showReviewCartModal = true;
   }
 
   checkout(){
     this._shop.cartCheckout().subscribe({
-      next:()=>{
+      next:(response)=>{
         //---
+        this.fetchCartOutput.emit("checkout completed");
       },
       error:()=>{
         //---
@@ -118,15 +125,33 @@ export class SidecartComponent implements OnInit {
   }
 
   updateCart(product:any) {
+    
     this._cart.cart.update(prev => prev.map((c:any)=>{
       if(c.id === product.id) c.qty = product.qty
-      return c
-    }))
+      return c;
+    }));
+    
+    //  let cart_temp:any = [];
+    // cart_temp = this._cart.cart();
+    // this.cart.set([]);
+    //   setTimeout(() => {
+    //       this.cart.update(() => [...cart_temp]);
+    //       //console.log("this.thisCart",this.thisCart(), this._cart.cart());
+    //   },100)
 
+    // --- this 'computed' updates cartCopy, when this func is called, eachtime
+    this.cartCopy.set([])
+    setTimeout(() => {
+        this.cartCopy.update( ()=>[...this._cart.cart()] )
+    }, 300);
+    
     this._shop.addProductToOrderedProducts(product.id, product.qty).subscribe({
       next: (product2)=>console.log("Updated Product >> ",product),
       error: (err)=>{throw new Error(err)}
     })
-    console.log("this._cart.cart------",this._cart.cart())
+    console.log("this._cart.cart ------ this.cartCopy",this._cart.cart(), this.cartCopy());
+
+
   }
+  
 }

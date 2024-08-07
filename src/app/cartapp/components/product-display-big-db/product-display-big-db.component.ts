@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, OnInit, Input, EventEmitter, Output, signal, computed, WritableSignal, effect, input } from '@angular/core';
+import { Component, ChangeDetectionStrategy, OnInit, Input, EventEmitter, Output, signal, computed, WritableSignal, effect, input, output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 @Component({
@@ -13,7 +13,7 @@ import { FormsModule } from '@angular/forms';
 export class ProductDisplayBigDbComponent implements OnInit{
   @Input() item:any = [];
   public qtyCount : WritableSignal<number> = signal(1);
-  @Output() public evt = new EventEmitter<any>();
+  evt = output<any>();
   mode = input<string>('')
 
   ngOnInit(): void {
