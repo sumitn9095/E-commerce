@@ -29,6 +29,7 @@ export class SidecartComponent implements OnInit {
   detectChange = input(false);
   cart = model<any[]>([]);
   cartCopy:WritableSignal<any> = signal([]);
+  cartSpecs = model<any[]>([]);
   orderId = input<string>("");
   filterQuery = output<any>();
   fetchCartOutput = output<any>();
@@ -42,7 +43,7 @@ export class SidecartComponent implements OnInit {
 
   //thiscart = computed(() => this.cart());
   cartPrice = computed(() => Math.round(this.calcCartPrice()));
-  totalQty = computed(() => this.cart().reduce((acc:any, item:any)=> parseInt(acc + item?.qty),0));
+  totalQty = computed(() => this.cartSpecs().reduce((acc:any, item:any)=> parseInt(acc + item?.qty),0));
   gst = computed(() => Math.round(this.cartPrice() * 18) / 100);
   deliveryCharges = computed(() => this.cartPrice() > 500 ? 0 : 100);
   cartTotalPrice = computed(() => this.cartPrice() + this.gst() + this.deliveryCharges());
@@ -51,8 +52,8 @@ export class SidecartComponent implements OnInit {
     // --- this 'computed' updates cartCopy only initially
     this.cartCopy.set([])
     setTimeout(() => {
-      this.cartCopy.update(()=>[...this.cart()]);
-    }, 500);
+        this.cartCopy.update( ()=>[...this.cartSpecs()] )
+    }, 300);
 
     // setTimeout(() => {
     //     this.cartCopy.update( ()=>[...this._cart.cart()] )
@@ -82,7 +83,7 @@ export class SidecartComponent implements OnInit {
   }
 
   calcCartPrice = () => {
-    return this.cart().reduce((acc:any, item:any) => {
+    return this.cartSpecs().reduce((acc:any, item:any) => {
       let totalIndividualProductPrice:number = item?.qty * parseInt(item?.price);
       return parseInt(acc + totalIndividualProductPrice);
     },0);
@@ -107,7 +108,17 @@ export class SidecartComponent implements OnInit {
   }
 
   reviewCart(){
-    //this.cart.update(()=>[...this._cart.cart()] )
+    // --- this 'computed' updates cartCopy only initially
+    // this.cartCopy.set([])
+    // setTimeout(() => {
+        this.cartCopy.update( () => {
+          this.cartSpecs().map((r:any)=>{
+            [...this.cartSpecs()]
+            }
+          )
+        })
+    //}, 300);
+
     console.log("this.cart",this.cart())
     this.showReviewCartModal = true;
   }
@@ -115,8 +126,7 @@ export class SidecartComponent implements OnInit {
   checkout(){
     this._shop.cartCheckout().subscribe({
       next:(response)=>{
-        //---
-        this.fetchCartOutput.emit("checkout completed");
+        if(response.response.acknowledged) this.fetchCartOutput.emit("checkout completed");
       },
       error:()=>{
         //---
@@ -127,6 +137,11 @@ export class SidecartComponent implements OnInit {
   updateCart(product:any) {
     
     this._cart.cart.update(prev => prev.map((c:any)=>{
+      if(c.id === product.id) c.qty = product.qty
+      return c;
+    }));
+
+    this.cartSpecs.update(prev => prev.map((c:any)=>{
       if(c.id === product.id) c.qty = product.qty
       return c;
     }));
@@ -142,7 +157,7 @@ export class SidecartComponent implements OnInit {
     // --- this 'computed' updates cartCopy, when this func is called, eachtime
     this.cartCopy.set([])
     setTimeout(() => {
-        this.cartCopy.update( ()=>[...this._cart.cart()] )
+        this.cartCopy.update( ()=>[...this.cartSpecs()] )
     }, 300);
     
     this._shop.addProductToOrderedProducts(product.id, product.qty).subscribe({

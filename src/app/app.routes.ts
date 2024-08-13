@@ -92,6 +92,10 @@ export const routes: Routes = [
       },
     ],
   },
+  {
+    path: 'cart-history',
+    loadComponent: ()=>import('./cartapp/pages/cart-history/cart-history.component').then((m)=>m.CartHistoryComponent)
+  }
   // {
   //     path: 'shopping/rxjs',
   //     loadComponent: ()=>import('./cartapp/components/shopping-list-rxjs/shopping-list-rxjs.component').then(m=>m.ShoppingListRxjsComponent)

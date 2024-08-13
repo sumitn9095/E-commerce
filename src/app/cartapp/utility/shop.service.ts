@@ -69,4 +69,9 @@ export class ShopService {
     let payloadObj = {email:this.user.email, orderId};
     return this._http.post<any>(`${environment.mongodb_api_url}orderInit`, payloadObj);
   }
+
+  cartHistory(){
+    let payloadObj = {email:this.user.email};
+    return this._http.post<any>(`${environment.mongodb_api_url}cartHistory`, payloadObj);
+  }
 }

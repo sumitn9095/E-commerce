@@ -5,10 +5,11 @@
     <h3>My Cart ({{totalQty()}})</h3>
     <p class="text-in-a-line" [title]="'Order Id: '+orderId()">Order Id: {{orderId()}}</p>
 
-    @if(cart().length) {
+
     <app-shopping-filters [categoryListDefined]="categoryListDefined()" [maxProductPrice]="maxProductPrice()"
       (payloadShoppingFilterValue)="filterProducts($event)"></app-shopping-filters>
 
+    @if(cart().length) {
     <p-dataView #dv [value]="cart()">
       <ng-template pTemplate="list">
         <div class="grid grid-nogutter">
@@ -25,11 +26,15 @@
         </div>
       </ng-template>
     </p-dataView>
+    } @else {
+    <h3>No items in Cart</h3>
+    }
 
     <div class="card flex justify-content-center">
       <p-button (onClick)="reviewCart()" label="Checkout" />
       <p-dialog header="Review Cart" [modal]="true" [(visible)]="showReviewCartModal" [style]="{ width: '50rem' }"
         [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [maximizable]="true">
+
         @for(cartItem of cartCopy(); track cartItem.id) {
         <div class="col-12">
           <app-product-display-big-db [item]="cartItem" [mode]="'read'"></app-product-display-big-db>
@@ -45,9 +50,7 @@
         </div>
       </p-dialog>
     </div>
-    } @else {
-    <h3>No items in Cart</h3>
-    }
+
 
   </p-sidebar>
 </div>

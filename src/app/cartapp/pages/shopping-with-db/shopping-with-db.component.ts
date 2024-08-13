@@ -44,10 +44,9 @@ export class ShoppingWithDbComponent implements OnInit {
   _cart = inject(CartService);
   _cs = inject(CourseService);
   _ms = inject(MessageService);
-  _shop = inject(ShopService)
+  _shop = inject(ShopService);
 
-  thisCart : WritableSignal<any> = signal<any>([])
-  //thisCart = computed( () => this._cart.cart() );
+  cartSpecs:WritableSignal<any> = signal<any>([]);
   
   orderId:any= '';
   shouldOpenSideCart = signal<boolean>(false);
@@ -169,7 +168,6 @@ export class ShoppingWithDbComponent implements OnInit {
   }
 
   addInCartCore = (cart:any, product:any) => {
-    console.log("this.thisCart",this.thisCart(), this._cart.cart())
     let isProductAlreadyInCart = cart.some((c:any)=> c.id === product.id);
     //var cart_temp : Array<any> = cart;
 
@@ -181,6 +179,7 @@ export class ShoppingWithDbComponent implements OnInit {
       product.qty = 1;
       //cart_temp.push(product);
       this._cart.cart.update(prev => [...prev,product])
+      this.cartSpecs.update(prev => [...prev,product])
     } else {
       // -- Product Already in Cart.
       this._cart.cart.update(prev => prev.map((c:any) => {
@@ -192,13 +191,6 @@ export class ShoppingWithDbComponent implements OnInit {
         return c
       }));
 
-      // setTimeout(() => {
-      //   this.thisCart.set([]);
-      //     setTimeout(() => {
-      //         this.thisCart.update( computed( () => this._cart.cart() ));
-      //     },200)
-      // },200)
-      
     }
 
    /// console.log("this._cart.cart -- after modification",this._cart.cart());
@@ -221,7 +213,7 @@ export class ShoppingWithDbComponent implements OnInit {
     this._cart.cart.set([]);
       setTimeout(() => {
           this._cart.cart.update(() => [...cart_temp]);
-          console.log("this.thisCart",this.thisCart(), this._cart.cart());
+          this.cartSpecs.update(() => [...cart_temp]);
       },100)
   }
 
@@ -248,11 +240,9 @@ export class ShoppingWithDbComponent implements OnInit {
       next:(response)=>{
           response.order.cart.map((order:any) => {
             if(order.products !== undefined) cart_products.push({...order.products, qty: order.qty});
-            //cart_products.push({...order.products, qty: order.qty});
           })
-          this._cart.cart.update(()=>cart_products);
-            this.thisCart.update( computed( () => this._cart.cart() ));
-          console.log("this._cart.cart",this._cart.cart());
+          this._cart.cart.update(()=>[...cart_products]);
+          //console.log("this._cart.cart",this._cart.cart());
       },
       error:(err)=>{
         let error = new Error(err);
@@ -266,7 +256,7 @@ export class ShoppingWithDbComponent implements OnInit {
     this._shop.fetch_orderId().subscribe({
       next:(response)=>{
         console.log("order >>",response.orderDetails);
-        if(response.orderDetails && response.orderDetails.length) {
+        if(typeof response.orderDetails === 'object' && response.orderDetails.length) {
           this.orderId = sessionStorage.getItem("shop_orderId")?.toString();
           sessionStorage.setItem("shop_orderId",response.orderDetails[0].orderId);
         } else {
@@ -298,8 +288,8 @@ export class ShoppingWithDbComponent implements OnInit {
               cart_products.push({...order.products, qty: order.qty});
               //products.push(product);
             })
-            this._cart.cart.update(()=>cart_products);
-             this.thisCart.update( computed( () => this._cart.cart() ));
+            this._cart.cart.update(()=>[...cart_products]);
+            this.cartSpecs.update(()=>[...cart_products])
             console.log("this._cart.cart",this._cart.cart());
       },
       error:(err)=>{
