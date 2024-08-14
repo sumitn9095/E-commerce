@@ -1,0 +1,34 @@
+DOCKER
+Build our image:
+docker build -t shop .
+
+DOCKER
+Run the app locally:
+docker run -p 80:80 shop
+
+AZURE
+Angular Container Registry > Access keys > Admin user (check) > get 'username', 'password'.
+
+AZURE
+Login to 'Azure container registry', before pushing docker image to it:
+az acr login –name shop
+az acr login -n angularcontainer
+
+DOCKER
+Tag the image and associate with our container registry:
+docker tag a9925ace66eeb68c0f8eba8be45b4c5617c8f92a382caae2e6a8ce504ad7e7e5 angularcontainer.azurecr.io/shop:v1
+
+DOCKER
+Push the image to 'Azure Container Registry':
+docker push angularcontainer.azurecr.io/shop:v1
+
+AZURE
+Now as docker image in our 'Azure Container Registry', we can create an 'Azure Container Instance'.
+
+
+
+
+
+
+
+
