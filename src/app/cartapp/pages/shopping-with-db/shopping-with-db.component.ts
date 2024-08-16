@@ -118,8 +118,6 @@ export class ShoppingWithDbComponent implements OnInit {
       type: 'single',
       product: product
     };
-    //this.latestProductAdded = {...productAdded}
-    //this.notifyProductAdded();
     this._ms.add({ key: 'addProduct', severity: 'success', data:productAdded, summary: 'Can you send me the report?' });
   }
 
@@ -134,19 +132,7 @@ export class ShoppingWithDbComponent implements OnInit {
       this.addInCartCore(this._cart.cart(), g, islast,true);
     });
     this.selectedMultipleProducts = [...this.selectedProducts]
-    // let productAdded = {
-    //   type: 'multiple',
-    //   product: this.selectedProducts
-    // }
-    // this.latestProductAdded = {...productAdded}
     this.notifyProductAdded();
-  }
-
-  processOutputSideCart(data:boolean){
-    //console.log("processOutputSideCart",data);
-    this.shouldOpenSideCart.set(data);
-    console.log("processOutputSideCart",data);
-    // this.shouldOpenSideCart.s
   }
 
   // - USER (action)
@@ -164,14 +150,10 @@ export class ShoppingWithDbComponent implements OnInit {
       //cart_temp.push(product);
       this._cart.cart.update(prev => [...prev,product])
       this.cartSpecs.update(prev => [...prev,product])
-
-      console.log("product-not-in-cart",product);
     } else {
       // -- Product Already in Cart.
       this._cart.cart.update(prev => prev.map((c:any) => {
-        
         if(c.id === product.id) {
-          
           product_qty_added = c.qty + 1;
           // -- Update the product's quantity in Cart Signal.
           c.qty = product_qty_added;
@@ -180,12 +162,8 @@ export class ShoppingWithDbComponent implements OnInit {
         return c
       }));
     }
-
-    //console.log("cart.length",this.selectedProducts.length);
-    
     if(multipleProductsAdd && isLast) this.updateCartInSidecart();
     else if(!multipleProductsAdd) this.updateCartInSidecart();
-
     // -- Update the product's quantity in MongoDB document
     this._shop.addProductToOrderedProducts(product.id, product_qty_added).subscribe({
       next: (product2)=>{
@@ -194,6 +172,66 @@ export class ShoppingWithDbComponent implements OnInit {
       },
       error: (err)=>{throw new Error(err)}
     })
+  }
+
+    // - USER (action)
+  // - Signgle Request | Add multiple products
+  singleReq_addProducts = () => {
+    console.log("selected-products",this.selectedProducts)
+    this.selectedProducts.map((g:any, i:number) => {
+      let islast:boolean=false;
+      if(this.selectedProducts.length == i+1) islast=true;
+      this.singleReq_processAddProducts(this._cart.cart(), g, islast,true);
+    });
+    this.selectedMultipleProducts = [...this.selectedProducts]
+    this.notifyProductAdded();
+  }
+
+  // - USER (action)
+  // Signgle Request | Process added products
+  singleReq_processAddProducts = (cart:any, product:any, isLast?:boolean, multipleProductsAdd?:boolean) => {
+    let productsToAdd_notInCart:any = []
+    let productsToAdd_alreadyInCart:any = []
+    console.log("multipleProductsAdd",multipleProductsAdd);
+    //console.log("selected-products",this.selectedProducts)
+    let isProductAlreadyInCart = cart.some((c:any)=> c.id === product.id);
+    //var cart_temp : Array<any> = cart;
+    let product_qty_added = 1;
+    if (!isProductAlreadyInCart) {
+      // -- Product NOT Already in Cart. Product added is NEW
+      //console.log("not matching")
+      product.qty = 1;
+      //cart_temp.push(product);
+      this._cart.cart.update(prev => [...prev,product])
+      this.cartSpecs.update(prev => [...prev,product])
+      productsToAdd_notInCart.push(product)
+    } else {
+      // -- Product Already in Cart.
+      this._cart.cart.update(prev => prev.map((c:any) => {
+        if(c.id === product.id) {
+          product_qty_added = c.qty + 1;
+          // -- Update the product's quantity in Cart Signal.
+          c.qty = product_qty_added;
+          console.log("product-already-in-cart",product);
+          productsToAdd_alreadyInCart.push(c)
+        }
+        return c
+      }));
+    }
+    if(multipleProductsAdd && isLast) this.updateCartInSidecart();
+    else if(!multipleProductsAdd) this.updateCartInSidecart();
+    // -- Update the product's quantity in MongoDB document
+
+    if(isLast){
+      console.log("productsToAdd",productsToAdd_alreadyInCart,productsToAdd_notInCart)
+      // this._shop.addProductToOrderedProducts(product.id, product_qty_added).subscribe({
+      //   next: (product2)=>{
+      //     console.log("product added",product);
+      //     this.selectedProducts= [];
+      //   },
+      //   error: (err)=>{throw new Error(err)}
+      // })
+    }
   }
 
   // - USER (action)

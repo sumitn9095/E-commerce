@@ -22,6 +22,7 @@ export class ShoppingFiltersComponent implements OnInit {
 
   public maxProductPrice:any = input<any>(0);
   public categoryListDefined:any = input<any>([]);
+  public isCartFilter = input<boolean>(false);
   @Output() payloadShoppingFilterValue = new EventEmitter<any>();
 
   public productsFilterGroup!: FormGroup;

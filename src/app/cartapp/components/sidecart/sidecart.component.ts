@@ -53,6 +53,7 @@ export class SidecartComponent implements OnInit {
     this.cartCopy.set([])
     setTimeout(() => {
         this.cartCopy.update( ()=>[...this.cartSpecs()] )
+        console.log("this.cartCopy",this.cartCopy())
     }, 300);
 
     // setTimeout(() => {
@@ -111,19 +112,22 @@ export class SidecartComponent implements OnInit {
     // --- this 'computed' updates cartCopy only initially
     // this.cartCopy.set([])
     // setTimeout(() => {
-        this.cartCopy.update( () => {
-          this.cartSpecs().map((r:any)=>{
-            [...this.cartSpecs()]
-            }
-          )
-        })
+        // this.cartCopy.update( () => {
+        //     return this.cartSpecs().map((r:any)=>{
+        //       [...this.cartSpecs()]
+        //     }
+        //   )
+        // })
+      let tempCart = this.cartSpecs().filter(k => k.qty !== 0)
+      this.cartCopy.update(() => [...tempCart]);
+
     //}, 300);
 
-    console.log("this.cart",this.cart())
+    console.log("this.cartCopy",this.cartCopy())
     this.showReviewCartModal = true;
   }
 
-  checkout(){
+  checkout() {
     this._shop.cartCheckout().subscribe({
       next:(response)=>{
         if(response.response.acknowledged) this.fetchCartOutput.emit("checkout completed");

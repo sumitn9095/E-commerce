@@ -16,7 +16,7 @@
         <div class="flex items-start justify-center">
           <div class="w-full mx-auto">
             <div class="card">
-              <button type="button" (click)="addToCart()">Buy</button>
+              <button type="button" (click)="singleReq_addProducts()">Buy</button>
               <p-table [value]="products().products" [(selection)]="selectedProducts" dataKey="id">
                 <ng-template pTemplate="header">
                   <tr>

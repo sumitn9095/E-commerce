@@ -1,0 +1,15 @@
+.isCartFilter-true {
+  .filter-wrap {
+    flex-wrap: wrap;
+  }
+
+  .filter-row-1 {
+    margin-bottom: 15px;
+  }
+}
+
+.isCartFilter-false {
+  .filter-wrap {
+    gap: 26px;
+  }
+}

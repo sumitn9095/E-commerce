@@ -1,13 +1,21 @@
 <!--  Sidebar -->
-<div class="card flex flex-wrap justify-content-center gap-2">
-  <p-sidebar [className]="'side_cart'" [dismissible]="false" [(visible)]="isTrueSet"
+<div class="card flex flex-wrap justify-content-center gap-2 items-start">
+  <p-sidebar [className]="'side_cart items-start'" [dismissible]="false" [(visible)]="isTrueSet"
     (onHide)="_cart.toggleSideCartPanel()" position="right">
-    <h3>My Cart ({{totalQty()}})</h3>
-    <p class="text-in-a-line" [title]="'Order Id: '+orderId()">Order Id: {{orderId()}}</p>
+    <ng-template pTemplate="header" class="items-start">
+      <div class="flex flex-col">
+        <div class="font-semibold text-xl">
+          <h3 class="m-0">My Cart ({{totalQty()}})</h3>
+          <p class="text-in-a-line m-0" [title]="'Order Id: '+orderId()">Order Id: {{orderId()}}</p>
+        </div>
+        <app-shopping-filters [categoryListDefined]="categoryListDefined()" [maxProductPrice]="maxProductPrice()"
+          [isCartFilter]="true" (payloadShoppingFilterValue)="filterProducts($event)"></app-shopping-filters>
+      </div>
+    </ng-template>
 
 
-    <app-shopping-filters [categoryListDefined]="categoryListDefined()" [maxProductPrice]="maxProductPrice()"
-      (payloadShoppingFilterValue)="filterProducts($event)"></app-shopping-filters>
+
+
 
     @if(cart().length) {
     <p-dataView #dv [value]="cart()">
@@ -19,37 +27,54 @@
             <app-product-display-big-db [item]="item" (evt)="updateCart($event)"></app-product-display-big-db>
           </div>
           }
-          <div>Sub Total: {{cartPrice()}}</div>
-          <div>GST: {{gst()}}</div>
-          <div>Delivery Charges: {{deliveryCharges()}}</div>
-          <div>Cart Total Price: {{cartTotalPrice()}}</div>
         </div>
       </ng-template>
     </p-dataView>
-    } @else {
-    <h3>No items in Cart</h3>
-    }
-
-    <div class="card flex justify-content-center">
-      <p-button (onClick)="reviewCart()" label="Checkout" />
-      <p-dialog header="Review Cart" [modal]="true" [(visible)]="showReviewCartModal" [style]="{ width: '50rem' }"
-        [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [maximizable]="true">
-
-        @for(cartItem of cartCopy(); track cartItem.id) {
-        <div class="col-12">
-          <app-product-display-big-db [item]="cartItem" [mode]="'read'"></app-product-display-big-db>
-        </div>
-        }
+    <!-- <ng-template pTemplate="footer"> -->
+    <div class="flex justify-between items-end">
+      <div>
         <div>Sub Total: {{cartPrice()}}</div>
         <div>GST: {{gst()}}</div>
         <div>Delivery Charges: {{deliveryCharges()}}</div>
         <div>Cart Total Price: {{cartTotalPrice()}}</div>
-        <div class="flex justify-end gap-2">
-          <p-button label="Cancel" severity="secondary" (onClick)="showReviewCartModal = false" />
-          <p-button label="Proceed" (onClick)="checkout();showReviewCartModal = false" />
+      </div>
+      <div>
+        <div class="card flex justify-content-center">
+          <p-button (onClick)="reviewCart()" label="Checkout" />
+          <p-dialog [header]="'Review Cart ('+totalQty()+')'" [modal]="true" [(visible)]="showReviewCartModal"
+            [style]="{ width: '50rem' }" [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [maximizable]="true">
+
+            @for(cartItem of cartCopy(); track cartItem.id) {
+            <div class="col-12">
+              <app-product-display-big-db [item]="cartItem" [mode]="'read'"></app-product-display-big-db>
+            </div>
+            }
+
+            <ng-template pTemplate="footer">
+              <div class="flex justify-between items-end pt-8 gap-2">
+                <div class="text-left">
+                  <div>Sub Total: {{cartPrice()}}</div>
+                  <div>GST: {{gst()}}</div>
+                  <div>Delivery Charges: {{deliveryCharges()}}</div>
+                  <div>Cart Total Price: {{cartTotalPrice()}}</div>
+                </div>
+                <div>
+                  <p-button label="Cancel" severity="secondary" (onClick)="showReviewCartModal = false" />
+                  <p-button label="Proceed" (onClick)="checkout();showReviewCartModal = false" />
+                </div>
+              </div>
+            </ng-template>
+          </p-dialog>
         </div>
-      </p-dialog>
+      </div>
     </div>
+    <!-- </ng-template> -->
+
+    } @else {
+    <h3>No items in Cart</h3>
+    }
+
+
 
 
   </p-sidebar>
