@@ -1,12 +1,13 @@
 <app-header></app-header>
 
 <div class="">
-  <div class="m-3 sm:w-8/12 mx-auto">
+  <div class="m-3 sm:w-9/12 mx-auto">
     <!-- <app-shopping-list-db></app-shopping-list-db> -->
     <div class="card flex justify-content-center">
       <app-shopping-filters [categoryListDefined]="categoryListDefined" [maxProductPrice]="maxProductPrice"
         (payloadShoppingFilterValue)="filterProducts($event)"></app-shopping-filters>
     </div>
+
     <p-panel header="Header">
       @defer (on viewport; prefetch on timer(0)) {
       <div class="form-group">
@@ -16,8 +17,7 @@
           <div class="w-full mx-auto">
             <div class="card">
               <button type="button" (click)="addToCart()">Buy</button>
-              <p-table [value]="products().products" [(selection)]="selectedProducts" dataKey="id"
-                [tableStyle]="{'min-width': '50rem'}">
+              <p-table [value]="products().products" [(selection)]="selectedProducts" dataKey="id">
                 <ng-template pTemplate="header">
                   <tr>
                     <th style="width: 4rem">
@@ -30,6 +30,7 @@
                     <th>Price</th>
                     <th>Manufacturing Date</th>
                     <th>Expiry Date</th>
+                    <th>Action</th>
                   </tr>
                 </ng-template>
                 <ng-template pTemplate="body" let-product>
@@ -68,9 +69,82 @@
       <i class="pi pi-search"></i>
       }
     </p-panel>
+
     <app-sidecart [detectChange]="_cart.onDetectChangeSideCart()" [cart]="_cart.cart()" [cartSpecs]="cartSpecs()"
       [orderId]="orderId" [categoryListDefined]="categoryListDefined" [maxProductPrice]="maxProductPrice"
       (filterQuery)="filter_cart($event)" (fetchCartOutput)="fetch_cart()">
     </app-sidecart>
+
+    <!-- Product Add Toast Notification -->
+    <!-- <p-toast position="bottom-right" key="addProduct" [baseZIndex]="5000">
+      <ng-template let-message pTemplate="message">
+        <div class="flex flex-col align-items-start" style="flex: 1">
+          <div>
+            <img title="{{ latestProductAdded.product.name }}" class="shadow-2 block xl:block mx-auto border-round"
+              [src]="'https://placehold.co/362x180?text='+ (latestProductAdded.type === 'single' ?
+              latestProductAdded.product.name : selectedProductsDetails.productNames.toString()) "
+              [alt]="'{{ latestProductAdded.product.name}}'" />
+          </div>
+          <div>
+            <div class="flex flex-row">
+              @if(latestProductAdded.type == 'single'){
+              <div class="w-60">
+                {{latestProductAdded.product.id}}
+              </div>
+              }
+              <div class="flex flex-row justify-between w-full font-bold text-900 ">
+                <div class="w-3/4">
+                  {{ latestProductAdded.type == 'single' ? latestProductAdded.product.name : '' }}
+                  @for(e of selectedProducts; track e.id){
+                  <div>{{e.name}} ({{e.category}}) - {{e.price}}</div>
+                  }
+                </div>
+                <div>
+                  {{ latestProductAdded.type == 'single' ?latestProductAdded.product.price : selectedProductsDetails.totalPrice }}
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </ng-template>
+    </p-toast> -->
+
+
+    <p-toast position="bottom-left" key="addProduct" [baseZIndex]="5000">
+      <ng-template let-message pTemplate="headless" let-closeFn="closeFn">
+        <div class="flex flex-col align-items-start" style="flex: 1">
+          <div>
+            <img title="{{ latestProductAdded.product.name }}" class="shadow-2 block xl:block mx-auto border-round"
+              [src]="'https://placehold.co/362x180?text='+ (message.data.type === 'single' ?
+              message.data.product.name : message.data.productNames.toString()) "
+              [alt]="'{{ message.data.product.name}}'" />
+          </div>
+          <div>
+            <div class="flex flex-row">
+              @if(message.data.type === 'single'){
+              <div class="w-60">
+                {{message.data.product.id}}
+              </div>
+              }
+              <div class="flex flex-row justify-between w-full font-bold text-900 ">
+                <div class="w-3/4">
+                  {{ message.data.type === 'single' ? message.data.product.name : '' }}
+                  @if(message.data.type !== 'single'){
+                  @for(e of selectedMultipleProducts; track e.id) {
+                  <div>{{e.name}} ({{e.category}}) - {{e.price}}</div>
+                  }
+                  }
+                </div>
+                <div>
+                  {{ message.data.type == 'single' ? message.data.product.price : message.data.totalPrice }}
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </ng-template>
+    </p-toast>
   </div>
 </div>

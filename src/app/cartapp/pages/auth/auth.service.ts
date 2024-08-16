@@ -12,7 +12,7 @@ export class AuthService {
   _router = inject(Router);
   constructor() {
     setTimeout(() => {
-      this.user = JSON.parse(sessionStorage.getItem("shop_user_details") as string);
+      if (typeof window !== "undefined") this.user = JSON.parse(sessionStorage.getItem("shop_user_details") as string);
     }, 2200);
   }
 
