@@ -1,10 +1,10 @@
-// @tailwind base;
+//@tailwind base;
 @tailwind components;
 @tailwind utilities;
-// @import "tailwindcss/base" layer(tailwindcss);
-// @import "tailwindcss/components" layer(tailwindcss);
-// @import "tailwindcss/utilities" layer(tailwindcss);
 
+// @import "tailwindcss/base" layer(tailwindcss);
+// @import "tailwindcss/components"layer(tailwindcss);
+// @import "tailwindcss/utilities"layer(tailwindcss);
 
 @import "primeng/resources/themes/lara-dark-teal/theme.css";
 @import "primeng/resources/primeng.css";
@@ -26,5 +26,13 @@
     position: absolute;
     top: 0;
     right: 0;
+  }
+}
+
+
+.add-edit-product-form {
+  .p-calendar table td>span {
+    width: 1.3rem !important;
+    height: 1.3rem !important;
   }
 }

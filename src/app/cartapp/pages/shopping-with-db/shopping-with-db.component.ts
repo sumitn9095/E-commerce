@@ -26,39 +26,63 @@ import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { InputGroupModule } from 'primeng/inputgroup';
 import { ShoppingFiltersComponent } from '../../components/shopping-filters/shopping-filters.component';
 import { ShoppingListComponent } from '../../components/shopping-list/shopping-list.component';
-import { HttpResponse } from '@angular/common/http';
-
+import { HttpEventType, HttpResponse } from '@angular/common/http';
+import { DialogModule } from 'primeng/dialog';
+import { FloatLabelModule } from 'primeng/floatlabel';
+import { environment } from '../../../../environments/environment';
+import { CarouselModule } from 'primeng/carousel';
+import { saveAs } from 'file-saver';
+import { CalendarModule } from 'primeng/calendar';
+import { FileUploadModule } from 'primeng/fileupload';
+import { ProgressBarModule } from 'primeng/progressbar';
 
 @Component({
   selector: 'app-shopping-with-db',
   standalone: true,
   imports: [
     RouterOutlet, HeaderComponent, ShoppingListRxjsComponent, FormsModule, ReactiveFormsModule, SidecartComponent, ToastModule, AsyncPipe, ShoppingListDbComponent,
-    FormsModule, ShoppingListComponent, ReactiveFormsModule,ButtonModule, PanelModule, TableModule, SkeletonModule, AutoCompleteModule, InputTextModule, ProgressSpinnerModule,  InputGroupAddonModule, InputGroupModule, ShoppingFiltersComponent],
+    FormsModule, ShoppingListComponent, ReactiveFormsModule,ButtonModule, PanelModule, TableModule, SkeletonModule, AutoCompleteModule, InputTextModule, ProgressSpinnerModule,  InputGroupAddonModule, InputGroupModule, ShoppingFiltersComponent, DialogModule, CalendarModule,FloatLabelModule, CarouselModule, FileUploadModule],
   providers: [MessageService],
   templateUrl: './shopping-with-db.component.html',
   styleUrl: './shopping-with-db.component.scss'
 })
 export class ShoppingWithDbComponent implements OnInit {
-
   _cart = inject(CartService);
   _cs = inject(CourseService);
   _ms = inject(MessageService);
   _shop = inject(ShopService);
+  _fb = inject(FormBuilder);
+
+  env = environment.base_url;
+  user:any={};
+
+  uploadedFiles:any[]=[]
 
   cartSpecs:WritableSignal<any> = signal<any>([]);
-  
   orderId:any= '';
   shouldOpenSideCart = signal<boolean>(false);
 
   categoryListDefined:any=[];
+  categoryList:any=[];
+  selectedCategory:any;
   maxProductPrice:number=0;
+
+  rangeDates: Date[] | undefined;
 
   public buyProductsForm!: FormGroup;
   public products:WritableSignal<any>  = signal({});
   public selectedProducts: any;
   public selectedMultipleProducts: any;
-  public selectedProductsDetails: any = {}
+  public selectedProductsDetails: any = {};
+  public stockOptions:any=[]
+
+  addEditProductForm!: FormGroup;
+  showAddEditPoductModal:boolean=false;
+  productToBeEdited:any={}
+  productToBeEdited_md_date:Date=new Date();
+  productToBeEdited_ed_date:Date=new Date();
+
+  shouldAddNewProduct:boolean=false;
 
   public latestProductAdded:LatestProduct = {
     type:'',
@@ -70,15 +94,29 @@ export class ShoppingWithDbComponent implements OnInit {
       price:0
     }
   }
+
+  progressAddEditFormUploadImgs:number=0
+  productImgToBeUploaded : any;
   
-  constructor(){}
+  constructor(){
+    if(typeof window !== "undefined") this.user = JSON.parse(sessionStorage.getItem("shop_user_details") as any);
+    console.log("selectedCategory",this.selectedCategory)
+  }
     
   ngOnInit(): void {
     this.fetch_products();
     this.fetch_cart();
     this.getCategoryList();
     this.getMaxProductPrice();
-   
+    this.addEditProductForm = this._fb.group({
+      name:['',[Validators.required]],
+      category:['',Validators.required],
+      price:[0,Validators.required],
+      instock:[true,Validators.required],
+      img:['',[]],
+      ed:[new Date(),Validators.required],
+      md:[new Date(),Validators.required]
+    })
   }
 
   notifyProductAdded() {
@@ -109,6 +147,176 @@ export class ShoppingWithDbComponent implements OnInit {
     console.log("selected Products are",this.selectedProducts)
   }
 
+  // - ADMIN (action)
+  editProduct(product:any){
+    this.productToBeEdited=product;
+    this.productToBeEdited_md_date = new Date(this.productToBeEdited.md);
+    this.productToBeEdited_ed_date = new Date(this.productToBeEdited.ed);
+    console.log("product",product)
+  }
+
+  addNewProduct(){
+    this.productToBeEdited = null;
+    this.showAddEditPoductModal = true;
+    this.productToBeEdited_md_date = new Date();
+    this.productToBeEdited_ed_date = new Date();
+    this.productImgToBeUploaded = [];
+    this.progressAddEditFormUploadImgs=0;
+  }
+
+  handleProductImg(e :any) {
+    //var newFile = new File([e.target.files[0]], "taskPhoto", {type: ".png"});
+    this.productImgToBeUploaded = e.target.files;
+    // for(let file of e.target.files) {
+    //     this.uploadedFiles.push(file);
+    // }
+  }
+  handleProductImgFileupload(e :any) {
+   // this.productImgToBeUploaded = e.target.files;
+    console.log("this.productImgToBeUploaded",e);
+    for(let file of e.files) {
+        this.uploadedFiles.push(file);
+    }
+  }
+
+  onSend(e:any){
+    console.log("onSend",e);
+  }
+
+  onSelect(e:any){
+     console.log("onSend",e);
+  }
+
+  uploadHandler(e:any){
+     console.log("uploadHandler",e);
+  }
+
+  // - ADMIN (action)
+  processAddEditProductForm(){
+    if(this.addEditProductForm.status === 'INVALID') return;
+    this.addEditProductForm.value.instock = this.addEditProductForm.value.instock.value !== undefined ? this.addEditProductForm.value.instock.value : true;
+    //console.log("this.addEditProductForm.value",this.addEditProductForm.value, this.addEditProductForm.status);
+    let obj;
+    if(this.shouldAddNewProduct){
+      obj = {
+        payload:this.addEditProductForm.value,
+        files:this.productImgToBeUploaded,
+        shouldAddNewProduct:true,
+      }
+    } else {
+      obj = {
+        payload:this.addEditProductForm.value,
+        files:this.productImgToBeUploaded,
+        shouldAddNewProduct:false,
+        id:this.productToBeEdited.id
+      }
+    }
+
+    this._shop.addEditProduct(obj).subscribe({
+      next: (event:any)=>{
+        if (event.type == HttpEventType.Sent) {
+          console.log("upload started - ")
+          this.progressAddEditFormUploadImgs = 0;
+        } else if(event.type == HttpEventType.UploadProgress) {
+          this.progressAddEditFormUploadImgs = (100 * event.loaded) / event.total;
+          console.log("upload progress - ",this.progressAddEditFormUploadImgs);
+        } else if(event instanceof HttpResponse) {
+          this.progressAddEditFormUploadImgs = 100;
+          console.log("upload completed - ",event.body);
+          this.fetch_products()
+        }
+      },
+      error: (err:Error)=>console.error(err)
+    })
+  }
+
+
+  removeProduct(productId:number){
+    this._shop.removeProduct(productId).subscribe({
+      next: (p)=>{
+        this.fetch_products()
+      },
+      error: (err:Error)=>console.error(err)
+    })
+  }
+
+
+  // - ADMIN (action)
+  removeProductImg(productId:number,productImg:string) {
+    let obj = {productId,productImg}
+    this._shop.removeProductImg(obj).subscribe({
+      next: (p)=>{
+        let remainingProductImgs:string[] = this.productToBeEdited?.imagePath.filter((i:string) => i !== productImg);
+        this.productToBeEdited.imagePath = [...remainingProductImgs]
+      },
+      error: (err:Error)=>console.error(err)
+    })
+  }
+
+
+  processDownloadProductPDF(){
+    this._shop.downloadPDF('downloadPDF').subscribe({
+      next: (event:any) => {
+
+      //  console.log("event",event)
+      // // const jsonString = JSON.stringify(event);
+      //  let blob = new Blob([event.body], {type: "application/pdf"})
+      //   saveAs(blob,`products3.pdf`);
+
+        if (event.type == HttpEventType.Sent) {
+          console.log("upload started - ")
+        } else if(event.type == HttpEventType.DownloadProgress) {
+          let progress = (100 * event.loaded) / event.total;
+          console.log("upload progress - ", progress);
+        } else if(event instanceof HttpResponse) {
+          console.log("upload completed - ",event.body);
+          // let binaryData = [];
+          //   binaryData.push(event.body);
+          // let llop = new Uint8Array(event.body, 0, event.body.byteLength)
+          //  let kkj = event.body['[Uint8Array]'];
+          let buffer:BlobPart[] = [event.body];
+
+          //var uint8View = new Uint8Array([event.body]);
+          
+          /////let blob = new Blob(buffer, { type: "application/octet-stream" });
+          //var file = new File([event.body], "MyTasks", {type: 'application/pdf'});
+          var file = new File([event.body], "", {type: 'text/plain'});
+          // const blob = new Blob([event.body], {
+          //   type: 'application/pdf',
+          // });
+          console.log("processDownloadProductPDF-blob",file)
+
+          saveAs(file,"Products.txt");
+          //const blob = new Blob([response.data], {type: 'application/pdf'})
+          // const link = document.createElement('a')
+          // link.href = window.URL.createObjectURL(blob)
+          // link.download = `your-file-name.pdf`
+          // link.click()
+
+        }
+      },
+      error: (err:Error)=>console.error(err)
+    })
+  }
+
+  processDownloadProductExcel(){
+    this._shop.downloadPDF('downloadProductExcel').subscribe({
+      next: (event:any) => {
+        if (event.type == HttpEventType.Sent) {
+          console.log("upload started - ")
+        } else if(event.type == HttpEventType.DownloadProgress) {
+          let progress = (100 * event.loaded) / event.total;
+          console.log("download progress - ", progress);
+        } else if(event instanceof HttpResponse) {
+          console.log("upload completed - ",event.body);
+          var file = new File([event.body], "MyTasks", {type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+          saveAs(file);
+        }
+      },
+      error: (err:Error)=>console.error(err)
+    })
+  }
+
   // - USER (action)
   // - Add single product
   addProduct(product:any){
@@ -119,6 +327,19 @@ export class ShoppingWithDbComponent implements OnInit {
       product: product
     };
     this._ms.add({ key: 'addProduct', severity: 'success', data:productAdded, summary: 'Can you send me the report?' });
+  }
+
+  filterMethodCategory(event:any) {
+    console.log("event.query",event);
+    let cl = [];
+    cl = this.categoryListDefined.categories;
+    //.log("cl",cl)
+    this.categoryList = ['All',...cl];
+  }
+
+
+  selectDate(data:any){
+    console.log(data)
   }
 
   // - USER (action)

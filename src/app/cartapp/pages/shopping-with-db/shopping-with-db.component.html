@@ -16,7 +16,11 @@
         <div class="flex items-start justify-center">
           <div class="w-full mx-auto">
             <div class="card">
-              <button type="button" (click)="singleReq_addProducts()">Buy</button>
+              <p-button label="Buy" icon="pi pi-check" (click)="singleReq_addProducts()" [size]="'small'" />
+              <p-button label="Download Products PDF" icon="pi pi-download" (click)="processDownloadProductPDF()"
+                severity="secondary" [size]="'small'" />
+              <p-button label="Download Products Excel" icon="pi pi-download" (click)="processDownloadProductExcel()"
+                severity="secondary" [size]="'small'" />
               <p-table [value]="products().products" [(selection)]="selectedProducts" dataKey="id">
                 <ng-template pTemplate="header">
                   <tr>
@@ -24,6 +28,7 @@
                       <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
                     </th>
                     <th>Id</th>
+                    <th>Image</th>
                     <th>Name</th>
                     <th>Category</th>
                     <th>InStock</th>
@@ -38,6 +43,22 @@
                     <td>
                       <p-tableCheckbox [value]="product"></p-tableCheckbox>
                     </td>
+                    <td>
+                      @if(product.imagePath.length) {
+                      <div class="flex">
+                        <p-carousel [value]="product.imagePath" [numVisible]="1" [numScroll]="1" [circular]="false">
+                          <ng-template let-product pTemplate="item">
+                            <!-- @for (item of product.imagePath; track '_id') { -->
+                            <!-- <div class="imgBox" [style]="'background:url('+ env + item +')'"></div> -->
+                            <div class="imgBox">
+                              <img [alt]="product" [title]="product" [src]="env + product" />
+                            </div>
+                            <!-- } -->
+                          </ng-template>
+                        </p-carousel>
+                      </div>
+                      }
+                    </td>
                     <td>{{product.id}}</td>
                     <td>{{product.name}}</td>
                     <td>{{product.category}}</td>
@@ -46,7 +67,17 @@
                     <td>{{product.md}}</td>
                     <td>{{product.ed}}</td>
                     <td>
-                      <p-button severity="success" (click)="addProduct(product)"> + </p-button>
+                      @if(this.user.admin){
+                      <p-button class="" icon="pi pi-file-edit"
+                        (click)="showAddEditPoductModal = true; editProduct(product)" [rounded]="true"
+                        severity="success" />
+                      <p-button class="" icon=" pi pi-trash" (click)="removeProduct(product._id)" [rounded]="true"
+                        severity="danger" />
+                      } @else {
+                      <p-button class="" icon=" pi pi-plus" (click)="addProduct(product)" [rounded]="true"
+                        severity="success" />
+
+                      }
                     </td>
                   </tr>
                 </ng-template>
@@ -70,54 +101,128 @@
       }
     </p-panel>
 
+    <button type="button" (click)="productImgToBeUploaded = []; progressAddEditFormUploadImgs=0; shouldAddNewProduct =
+      true;addNewProduct()">AddProduct</button>
+
+    @if(this.user.admin){
+    <p-dialog #AddEditPoductModal [header]="'Edit Product'" [modal]="true" [(visible)]="showAddEditPoductModal"
+      [style]="{ width: '50rem' }" [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [maximizable]="true">
+      <form [formGroup]="addEditProductForm" class="add-edit-product-form" enctype="multipart/form-data"
+        (ngSubmit)="processAddEditProductForm()">
+
+        <div class="grid grid-cols-2 gap-4">
+          <div class="flex flex-col gap-2">
+            <label for="username">Name</label>
+            <input pInputText formControlName="name"
+              [ngModel]="productToBeEdited !== null ? productToBeEdited.name : ''" [size]="'large'" />
+          </div>
+          <div class="flex flex-col gap-2">
+            <label for="username">Category</label>
+            <p-autoComplete [ngModel]="productToBeEdited !== null ? productToBeEdited.category : ''"
+              [suggestions]="categoryList" [placeholder]="'All'" (completeMethod)="filterMethodCategory($event)"
+              [dropdown]="true" formControlName="category" styleClass="w-full" />
+          </div>
+        </div>
+        <div class="grid gap-4">
+          <div class="flex flex-col gap-2">
+            <label for="username">Images</label>
+            @if(productToBeEdited?.imagePath?.length) {
+            <div class="flex">
+              <!-- <p-carousel [value]="productToBeEdited.imagePath" [numVisible]="1" [numScroll]="1" [circular]="false">
+                  <ng-template let-product pTemplate="item"> -->
+              @for (item of productToBeEdited?.imagePath; track '_id') {
+              <div class="imgBox">
+                <p-button class="absolute top-2 right-2" icon=" pi pi-times "
+                  (click)="removeProductImg(productToBeEdited.id,item)" [rounded]="true" severity="danger" />
+                <img [alt]="item" [title]="item" [src]="env + item" />
+              </div>
+              }
+              <!-- </ng-template>
+                </p-carousel> -->
+            </div>
+            }
+          </div>
+          <div class="">
+            <div class="grid grid-cols-2 gap-4">
+              <input pInputText name="img" type="file" formControlName="img" multiple="true"
+                (change)="handleProductImg($event)" />
+              <div class="card">
+                <p-progressBar [value]="progressAddEditFormUploadImgs" />
+              </div>
+            </div>
+            <ng-template [ngIf]="uploadedFiles.length">
+              <ul>
+                <li *ngFor="let file of productImgToBeUploaded">
+                  {{ file.name }} - {{ file.size }} bytes
+                </li>
+              </ul>
+            </ng-template>
+
+            <!-- <p-fileUpload name="img" (onUpload)="handleProductImgFileupload($event)" (onSelect)="onSelect($event)"
+              (uploadHandler)="uploadHandler($event)"
+              (onSend)="onSend($event)" [multiple]="true" accept="image/*" maxFileSize="1000000">
+              <ng-template pTemplate="content">
+                <ul *ngIf="uploadedFiles.length">
+                  <li *ngFor="let file of uploadedFiles">
+                    {{ file.name }} - {{ file.size }} bytes
+                  </li>
+                </ul>
+              </ng-template>
+            </p-fileUpload> -->
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div class="flex flex-col gap-2">
+            <label for="username">Price</label>
+            <input pInputText formControlName="price" [type]="'number'"
+              [ngModel]="productToBeEdited !== null ? productToBeEdited.price : ''" />
+          </div>
+          <div class="flex flex-col gap-2">
+            <label for="username">InStock</label>
+            <p-autoComplete [dropdown]="true" [ngModel]="productToBeEdited !== null ? productToBeEdited.instock ? 'In Stock' : 'Out of Stock' :
+                  true" [suggestions]="stockOptions"
+              (completeMethod)="stockOptions=[{name:'In Stock',value:true},{name:'Out of Stock', value:false}]"
+              optionLabel="name" name="instock" formControlName="instock" styleClass="w-full" />
+          </div>
+        </div>
+        <div class="grid grid-cols-5 gap-4 ">
+          <div class="col-span-2 flex flex-col gap-2">
+            <label for="username">Manufacturing Date</label>
+            <p-calendar [(ngModel)]="productToBeEdited_md_date" [dateFormat]="'dd/mm/yy'" formControlName="md"
+              [style]="{'width':'100%'}" [inline]="true" (onClose)="selectDate($event)" styleClass="w-full" />
+          </div>
+          <div class="flex flex-col gap-2">23 days</div>
+          <div class="col-span-2 flex flex-col gap-2">
+            <label for="username">Expiry Date</label>
+            <p-calendar [(ngModel)]="productToBeEdited_ed_date" [dateFormat]="'dd/mm/yy'" formControlName="ed"
+              [style]="{'width':'100%'}" [inline]="true" (onClose)="selectDate($event)" styleClass="w-full" />
+          </div>
+        </div>
+
+        <!-- <ng-template pTemplate="footer"> -->
+        <div class="flex justify-end items-end pt-8 gap-2">
+          <div>
+            <p-button label="Cancel" [size]="'small'" severity="secondary" />
+            <p-button label="Proceed" [size]="'large'" type="submit" />
+          </div>
+        </div>
+        <!-- </ng-template> -->
+      </form>
+    </p-dialog>
+    } @else {
     <app-sidecart [detectChange]="_cart.onDetectChangeSideCart()" [cart]="_cart.cart()" [cartSpecs]="cartSpecs()"
       [orderId]="orderId" [categoryListDefined]="categoryListDefined" [maxProductPrice]="maxProductPrice"
       (filterQuery)="filter_cart($event)" (fetchCartOutput)="fetch_cart()">
     </app-sidecart>
 
     <!-- Product Add Toast Notification -->
-    <!-- <p-toast position="bottom-right" key="addProduct" [baseZIndex]="5000">
-      <ng-template let-message pTemplate="message">
-        <div class="flex flex-col align-items-start" style="flex: 1">
-          <div>
-            <img title="{{ latestProductAdded.product.name }}" class="shadow-2 block xl:block mx-auto border-round"
-              [src]="'https://placehold.co/362x180?text='+ (latestProductAdded.type === 'single' ?
-              latestProductAdded.product.name : selectedProductsDetails.productNames.toString()) "
-              [alt]="'{{ latestProductAdded.product.name}}'" />
-          </div>
-          <div>
-            <div class="flex flex-row">
-              @if(latestProductAdded.type == 'single'){
-              <div class="w-60">
-                {{latestProductAdded.product.id}}
-              </div>
-              }
-              <div class="flex flex-row justify-between w-full font-bold text-900 ">
-                <div class="w-3/4">
-                  {{ latestProductAdded.type == 'single' ? latestProductAdded.product.name : '' }}
-                  @for(e of selectedProducts; track e.id){
-                  <div>{{e.name}} ({{e.category}}) - {{e.price}}</div>
-                  }
-                </div>
-                <div>
-                  {{ latestProductAdded.type == 'single' ?latestProductAdded.product.price : selectedProductsDetails.totalPrice }}
-                </div>
-              </div>
-            </div>
-          </div>
-
-        </div>
-      </ng-template>
-    </p-toast> -->
-
-
     <p-toast position="bottom-left" key="addProduct" [baseZIndex]="5000">
       <ng-template let-message pTemplate="headless" let-closeFn="closeFn">
         <div class="flex flex-col align-items-start" style="flex: 1">
           <div>
             <img title="{{ latestProductAdded.product.name }}" class="shadow-2 block xl:block mx-auto border-round"
               [src]="'https://placehold.co/362x180?text='+ (message.data.type === 'single' ?
-              message.data.product.name : message.data.productNames.toString()) "
+                      message.data.product.name : message.data.productNames.toString()) "
               [alt]="'{{ message.data.product.name}}'" />
           </div>
           <div>
@@ -146,5 +251,6 @@
         </div>
       </ng-template>
     </p-toast>
+    }
   </div>
 </div>

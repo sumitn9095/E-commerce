@@ -1,8 +1,11 @@
-<!-- <app-header></app-header>
-
+<app-header></app-header>
+<p-dropdown [options]="orders" optionLabel="name" [(ngModel)]="selectedOrderName" (onChange)="selectOrder($event)"
+  placeholder="Select Order" />
 <div class="">
   <div class="m-3 sm:w-8/12 mx-auto">
     <div class="card flex justify-content-center">
+      <app-shopping-filters [categoryListDefined]="categoryListDefined" [maxProductPrice]="maxProductPrice"
+        [isCartFilter]="true" (payloadShoppingFilterValue)="filter_cart($event)"></app-shopping-filters>
     </div>
     <p-panel header="Header">
       @defer (on viewport; prefetch on timer(0)) {
@@ -10,7 +13,7 @@
         <div class="flex items-start justify-center">
           <div class="w-full mx-auto">
             <div class="card">
-              <p-table [value]="products().products" dataKey="id" [tableStyle]="{'min-width': '50rem'}">
+              <p-table [value]="productList()" dataKey="id" [paginator]="true" [rows]="5">
                 <ng-template pTemplate="header">
                   <tr>
                     <th>Id</th>
@@ -23,16 +26,28 @@
                     <th>Total Price</th>
                   </tr>
                 </ng-template>
-                <ng-template pTemplate="body" let-product>
+                <ng-template pTemplate="body" let-order>
                   <tr>
-                    <td>{{product.id}}</td>
-                    <td>{{product.name}}</td>
-                    <td>{{product.category}}</td>
-                    <td>{{product.md}}</td>
-                    <td>{{product.ed}}</td>
-                    <td>{{product.price}}</td>
-                    <td>{{product.qty}}</td>
-                    <td>{{product.totalPrice}}</td>
+                    <td>{{order?.products?.id}}</td>
+                    <td>{{order?.products?.name}}</td>
+                    <td>{{order?.products?.category}}</td>
+                    <td>{{order?.products?.md}}</td>
+                    <td>{{order?.products?.ed}}</td>
+                    <td>{{order?.products?.price}}</td>
+                    <td>{{order?.qty}}</td>
+                    <td>{{order?.products?.price * order?.qty}}</td>
+                  </tr>
+                </ng-template>
+                <ng-template pTemplate="footer" let-order>
+                  <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td>{{cartQtyTotal()}}</td>
+                    <td>{{cartPriceTotal()}}</td>
                   </tr>
                 </ng-template>
               </p-table>
@@ -54,4 +69,4 @@
       }
     </p-panel>
   </div>
-</div> -->
+</div>

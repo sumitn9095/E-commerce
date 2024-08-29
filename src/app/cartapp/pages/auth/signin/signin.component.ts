@@ -41,21 +41,22 @@ export class SigninComponent implements OnInit {
     this._auth.signin(payload)
       .subscribe({
         next: (user)=>{
-            //console.log("user >>",user);
-          if(user.err && user.err.errors.name) {
+            console.log("user >>",user);
+          if(user?.err && user?.err?.errors?.name) {
             //console.log("user error");
-            this._ms.add({ severity: 'error', summary: `${user.err.message}` });
+            this._ms.add({ severity: 'error', summary: `${user?.err?.message}` });
           } else {
             //console.log("user signedin");
-            this._ms.add({ severity: 'success', summary: `Hello, ${user.user.name}. Welcome to the Shop.`, detail: `You can now go product shopping.` });
-            sessionStorage.setItem("shop_token",user.token);
-            sessionStorage.setItem("shop_user_details",JSON.stringify(user.user));
+            this._ms.add({ severity: 'success', summary: `Hello, ${user?.user?.name}. Welcome to the Shop.`, detail: `You can now go product shopping.` });
+            sessionStorage.setItem("shop_token",user?.token);
+            sessionStorage.setItem("shop_user_details",JSON.stringify(user?.user));
+            if(user?.admin == 'true') sessionStorage.setItem("admin",user?.isAdmin);
             this._router.navigate(['/shopping-with-db']);
           }
         },
         error: (err)=>{
           console.log("user error >>",err);
-          this._ms.add({ severity: 'error', summary: `${err.error.message}` });
+          this._ms.add({ severity: 'error', summary: `${err?.error?.message}` });
         }
       })
   }
