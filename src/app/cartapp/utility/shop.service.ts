@@ -1,17 +1,28 @@
 import { inject, Injectable } from '@angular/core';
 import { environment } from '../../../environments/environment';
 import { HttpRequest, HttpClient, HttpResponse, HttpHeaders } from '@angular/common/http';
+import { CommonConstants } from './CommonConstants';
+import { BehaviorSubject, Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ShopService {
   _http = inject(HttpClient);
-  user:any={};
-  orderId:any;
+  user:any=CommonConstants?.user();
+  orderId:any=CommonConstants?.orderId();
+  stateBs = new BehaviorSubject<any>('')
   constructor() {
-    if(typeof window !== "undefined") this.user = JSON.parse(sessionStorage.getItem("shop_user_details") as any);
-    if(typeof window !== "undefined") this.orderId = sessionStorage.getItem("shop_orderId");
+    //if(typeof window !== "undefined") this.user = JSON.parse(sessionStorage.getItem("shop_user_details") as any);
+    //if(typeof window !== "undefined") this.orderId = sessionStorage.getItem("shop_orderId");
+    //console.log("user",this.user)
+  }
+
+  printApiState(state:any) {
+      this.stateBs.next(state);
+      // this.errorBs.subscribe((data) => {
+      //     console.log('my error state', data);
+      // });
   }
 
   fetchCart(){
@@ -40,51 +51,56 @@ export class ShopService {
     let maxProductPriceQuery = new HttpRequest("GET",`${environment.mongodb_api_url}getMaxProductPrice`);
     return this._http.request(maxProductPriceQuery);
   }
-  //--------------------------------------
+  //--------------------------  --------------------------
 
   product_add(productId:number){
-    let payload = {email: this.user.email, productId};
+    let payload = {email: this.user?.email, productId};
     return this._http.post<any>(`${environment.mongodb_api_url}addProductToOrder`,payload);
   }
 
   addProductToOrderedProducts(id:number, qty:number){
-    let payload = {email:this.user.email, orderId:this.orderId, id, qty};
+    let payload = {email:this.user?.email, orderId:this.orderId, id, qty};
     return this._http.post<any>(`${environment.mongodb_api_url}addProductToOrderedProducts`,payload);
   }
 
-  fetch_orderedProducts(payload:{}) {
-    let payloadObj = {email:this.user.email, orderId:this.orderId, order:"inProgress", payload};
+  fetch_orderedProducts(payload:any) {
+    //CommonConstants.userAsPromise()
+    ///CommonConstants.userAsPromise().then(user => {
+    let useremail = this.user?.email;
+    let userOrderId = this.orderId;
+    let payloadObj = {email: useremail, orderId:userOrderId, order:"inProgress", payload};
     return this._http.post<any>(`${environment.mongodb_api_url}fetch_orderedProducts`, payloadObj);
+    //})
   }
   filter_order(orderId:string,payload:{}) {
-    let payloadObj = {email:this.user.email, orderId, order:"inProgress", payload};
+    let payloadObj = {email:this.user?.email, orderId, order:"inProgress", payload};
     return this._http.post<any>(`${environment.mongodb_api_url}fetch_orderedProducts`, payloadObj);
   }
 
   fetch_orderId() {
-    let payload = {email:this.user.email};
+    let payload = {email:this.user?.email};
     return this._http.post<any>(`${environment.mongodb_api_url}fetch_orderId`,payload);
   }
 
   cartCheckout() {
-    let payloadObj = {email:this.user.email, orderId:this.orderId};
+    let payloadObj = {email:this.user?.email, orderId:this.orderId};
     return this._http.post<any>(`${environment.mongodb_api_url}cartCheckout`, payloadObj);
   }
 
   orderInit(orderId:number){
-    let payloadObj = {email:this.user.email, orderId};
+    let payloadObj = {email:this.user?.email, orderId};
     return this._http.post<any>(`${environment.mongodb_api_url}orderInit`, payloadObj);
   }
 
   cartHistory(){
-    let payloadObj = {email:this.user.email};
+    let payloadObj = {email:this.user?.email};
     return this._http.post<any>(`${environment.mongodb_api_url}cartHistory`, payloadObj);
   }
 
   //---------------- admin -----------------
-  addEditProduct(pld:any){
+  addEditProduct(pld:any) {
     const {payload, files, shouldAddNewProduct} = pld;
-    console.log("file to upload",files);
+    console.log("addEditProduct",pld);
     let htp = new HttpHeaders();
     htp.append("Content-Type", "multipart/form-data");
     let formData = new FormData();
@@ -97,14 +113,15 @@ export class ShopService {
         formData.append('img[]', files[i], files[i].name);
       };
     }
-    formData.append('name',payload?.name)
+    formData.append('name',payload?.name);
+    formData.append('email',this.user?.email);
     formData.append('category',payload?.category);
     formData.append('md',payload?.md);
     formData.append('ed',payload?.ed);
     formData.append('price',payload?.price);
     formData.append('instock',payload?.instock);
 
-    let hpr = new HttpRequest('POST',`${environment.mongodb_api_url}${addEditProductRoute}`,formData,{
+    let hpr = new HttpRequest('POST',`${environment.mongodb_api_url}${addEditProductRoute}`,formData, {
       headers:htp,
       reportProgress: true,
       responseType: 'json',
@@ -122,11 +139,11 @@ export class ShopService {
   }
 
   // Download PDF
-  downloadPDF(api:string) {
+  downloadPDF() {
     let hdr = new HttpHeaders();
     //hdr.append('Content-Type','application/octet-stream');
     hdr.append('Accept', 'application/pdf');
-    let req = new HttpRequest("GET",`${environment.mongodb_api_url}${api}`,{
+    let req = new HttpRequest("GET",`${environment.mongodb_api_url}downloadPDF`,{
       headers: hdr,
       responseType: 'arraybuffer',
       // responseType: 'blob' as 'json',
@@ -145,11 +162,11 @@ export class ShopService {
 
 
   // Download PDF
-  downloadProductExcel(api:string) {
+  downloadProductExcel(payload:{}) {
     let hdr = new HttpHeaders();
     hdr.append('Content-Type','application/octet-stream');
-    hdr.append('Accept', 'application/pdf');
-    let req = new HttpRequest("GET",`${environment.mongodb_api_url}${api}`,{
+    //hdr.append('Accept', 'application/pdf');
+    let req = new HttpRequest("POST",`${environment.mongodb_api_url}downloadProductExcel`, payload,{
       headers: hdr,
       responseType: 'arraybuffer',
       // responseType: 'blob' as 'json',
@@ -165,4 +182,31 @@ export class ShopService {
     //   reportProgress: true,
     // });
   }
+
+  uploadProducts(file:any,replace:boolean): Observable<any> {
+    let hdr = new HttpHeaders();
+    hdr.append('Content-type', 'multipart/form-data');
+    const form = new FormData();
+    if(file) form.append('productexcel', file, file.name);
+    form.append('email',this.user?.email);
+    form.append('replace',replace ? 'replace' : 'append');
+    if(this.user?.admin) form.append('admin', this.user?.admin);
+    //return this._http.post<any>(`${environment.mongodb_api_url}`, form, {headers: hdr});
+    var req = new HttpRequest('POST',`${environment.mongodb_api_url}uploadProductExcel`,form,
+      {
+          headers: hdr,
+          responseType: 'json',
+          // responseType: 'blob' as 'json',
+          reportProgress: true,
+          withCredentials: false,
+      }
+    );
+    return this._http.request(req);
+  }
+
+
+  //------------------- category / product --
+    fetchProduct(id:number) {
+      return this._http.get(`${environment.mongodb_api_url}fetchProduct/${id}`)
+    }
 }

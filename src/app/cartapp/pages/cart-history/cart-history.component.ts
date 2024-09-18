@@ -14,6 +14,7 @@ import { DropdownModule } from 'primeng/dropdown';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ShoppingFiltersComponent } from '../../components/shopping-filters/shopping-filters.component';
 import { HttpResponse } from '@angular/common/http';
+import moment, { Moment } from 'moment';
 
 @Component({
   selector: 'app-cart-history',
@@ -37,6 +38,7 @@ export class CartHistoryComponent implements OnInit {
   selectedCartTotal:WritableSignal<number>=signal(0);
   cartPriceTotal:WritableSignal<number>=signal(0);
   cartQtyTotal:WritableSignal<number>=signal(0);
+  m2 = moment
   constructor(){
     
   }
@@ -61,22 +63,24 @@ export class CartHistoryComponent implements OnInit {
   }
 
   selectOrder(orderId:any) {
-    console.log("orderId",orderId)
+    ///console.log("orderId",orderId)
     this.selectedOrder = this.allOrderData.filter((ordr:any) => ordr._id === orderId.value.name)[0];
     this.productList.update(()=>[...this.selectedOrder?.orderDetails?.orderIn?.orderedProductList])
     //console.log("selectedOrder",this.selectedOrder)
     // this.selectedCartTotal.update(()=>this.selectedOrder?.orderDetails?.orderIn?.orderedProductList.reduce((acc:number,item:any)=> Number( (Number(item?.products?.price) * Number(item?.qty)) + acc )));
     var ooo:number;
     
-    
+    //------
     this.selectedOrder?.orderDetails?.orderIn?.orderedProductList.reduce((acc:number, item:any) => {
-      let iPrice = parseInt(item?.products?.price);
-      let iQty = parseInt(item?.qty);
-      ooo = (iPrice * iQty);
-      this.cartPriceTotal.update(()=> this.cartPriceTotal()+ooo);
-      this.cartQtyTotal.update(()=> this.cartQtyTotal()+iQty);
-      //ooo =  acc;
-      console.log("selectedOrder---ooo", item?.products?.id, acc, ooo, this.cartPriceTotal(), this.cartQtyTotal());
+      if(item?.products?.id !== undefined) {
+          let iPrice = parseInt(item?.products?.price);
+          let iQty = parseInt(item?.qty);
+          ooo = (iPrice * iQty);
+          this.cartPriceTotal.update(()=> this.cartPriceTotal()+ooo);
+          this.cartQtyTotal.update(()=> this.cartQtyTotal()+iQty);
+          //ooo =  acc;
+          console.log("selectedOrder---ooo", item?.products?.id, acc, ooo, this.cartPriceTotal(), this.cartQtyTotal());
+      }
     });
     console.log("cartPriceTotal---cartPriceTotal",this.cartPriceTotal(),this.cartQtyTotal())
   }

@@ -1,7 +1,7 @@
 <!--  Sidebar -->
 <div class="card flex flex-wrap justify-content-center gap-2 items-start">
   <p-sidebar [className]="'side_cart items-start'" [dismissible]="false" [(visible)]="isTrueSet"
-    (onHide)="_cart.toggleSideCartPanel()" position="right">
+    (onHide)="_cart.closeSideCartPanel()" position="right">
     <ng-template pTemplate="header" class="items-start">
       <div class="flex flex-col">
         <div class="font-semibold text-xl">
@@ -9,7 +9,14 @@
           <p class="text-in-a-line m-0" [title]="'Order Id: '+orderId()">Order Id: {{orderId()}}</p>
         </div>
         <app-shopping-filters [categoryListDefined]="categoryListDefined()" [maxProductPrice]="maxProductPrice()"
-          [isCartFilter]="true" (payloadShoppingFilterValue)="filterProducts($event)"></app-shopping-filters>
+          [isCartFilter]="true" (payloadShoppingFilterValue)="filterProducts($event)">
+        </app-shopping-filters>
+        <div class="flex justify-end gap-6">
+          <p-button title="Download Products PDF" icon="pi pi-file-pdf" (click)="eventProductF('pdf')"
+            severity="secondary" [size]="'small'" />
+          <p-button title="Download Products Excel" icon="pi pi-file-excel" (click)="eventProductF('excel')"
+            severity="secondary" [size]="'small'" />
+        </div>
       </div>
     </ng-template>
 

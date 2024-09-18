@@ -57,7 +57,14 @@ export class ShoppingFiltersComponent implements OnInit {
       price: [''],
       priceFrom: [0,''],
       priceTo: [this.maxProductPrice(),''],
-    })
+    });
+
+    setTimeout(() => {
+        this.productsFilterGroup.patchValue({
+          priceTo: this.maxProductPrice()
+        })
+    }, 400);
+    
   }
 
   filterProductsGroupStatus(){
@@ -71,6 +78,25 @@ export class ShoppingFiltersComponent implements OnInit {
     this.priceTo = (displayPriceTo * this.maxProductPrice()) / 100;
     // console.log("priceTo",this.priceTo)
     // console.log("displayPriceStatus2 * this.maxProductPrice",displayPriceStatus2,this.maxProductPrice)
+  }
+
+  resetFilters(){
+    this.productsFilterGroup.reset();
+    this.productsFilterGroup.patchValue({
+      category:[],
+      instock:[],
+      date:[],
+      price:[0,100],
+      priceFrom:0,
+      priceTo: this.maxProductPrice()
+    });
+    setTimeout(() => {
+        this.productsFilterGroup.patchValue({
+          priceTo: this.maxProductPrice()
+        });
+         this.filterProducts();
+    }, 500);
+   
   }
   
   filterProducts() {

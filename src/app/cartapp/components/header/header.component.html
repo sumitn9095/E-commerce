@@ -9,9 +9,25 @@
       </div>
     </ng-template>
     <ng-template pTemplate="end">
-      <!-- {{_cart.sideCartOpen()}} -- _cart.sideCartOpen -->
+
+      <!-- <p-autoComplete [dropdown]="true" [suggestions]="profileOptions"
+        (completeMethod)="profileOptions=['Cart History','Sign Out']" (onSelect)="processProfileDropdown($event)" /> -->
+      <!-- <div class="card flex justify-content-center">
+        <i class="pi pi-user text-3xl" (click)="_auth.signout()"></i>
+        <span>{{user?.name}}</span>
+      </div> -->
+
+      @if(user && !user?.admin) {
       <div class="card flex justify-content-center">
-        <!-- <p-menu #menu [model]="items" [popup]="true" /> -->
+        <i class="pi pi-cart-plus text-3xl" pBadge [value]="cartQty()" (click)="_cart.openSideCartPanel()"></i>
+      </div>
+      }
+
+      <!-- [disabled]="user?.admin || user?.admin!=='' || user!==undefined" -->
+      <p-splitButton [label]="user?.name" [hidden]="!user" [model]="items" [icon]="'pi pi-user text-1xl'" raised text />
+
+      <!-- {{_cart.sideCartOpen()}} -- _cart.sideCartOpen -->
+      <!-- <div class="card flex justify-content-center">
         <div class="card flex justify-content-center">
           <p-menu #menu [model]="items" [popup]="true">
             <ng-template pTemplate="item" let-item>
@@ -23,15 +39,8 @@
           </p-menu>
         </div>
         <p-button (onClick)="menu.toggle($event)" icon="pi pi-ellipsis-v" />
-      </div>
-      <!-- <p-autoComplete [dropdown]="true" [suggestions]="profileOptions"
-        (completeMethod)="profileOptions=['Cart History','Sign Out']" (onSelect)="processProfileDropdown($event)" /> -->
-      <div class="card flex justify-content-center">
-        <i class="pi pi-user text-3xl" (click)="_auth.signout()"></i>
-      </div>
-      <div class="card flex justify-content-center">
-        <i class="pi pi-cart-plus text-3xl" pBadge [value]="cartQty()" (click)="_cart.toggleSideCartPanel()"></i>
-      </div>
+      </div> -->
+
       <!-- <div class="card flex justify-content-center">
                     <p-overlayPanel #op>
                         <ng-template pTemplate="content">

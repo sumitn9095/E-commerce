@@ -7,12 +7,30 @@
       <app-shopping-filters [categoryListDefined]="categoryListDefined" [maxProductPrice]="maxProductPrice"
         [isCartFilter]="true" (payloadShoppingFilterValue)="filter_cart($event)"></app-shopping-filters>
     </div>
-    <p-panel header="Header">
+
+    <p-panel header="Selected Cart Order">
       @defer (on viewport; prefetch on timer(0)) {
       <div class="form-group">
         <div class="flex items-start justify-center">
           <div class="w-full mx-auto">
             <div class="card">
+              <div class="flex justify-between items-center">
+                <div class="flex flex-col gap-1">
+                  <label class="block mb-1">Order ID</label>
+                  <input title="Price From" type="text" pInputText formControlName="priceFrom"
+                    [value]="selectedOrder?._id" readonly />
+                </div>
+                <div class="flex flex-col gap-1">
+                  <label class="block mb-1">Created At</label>
+                  <input title="Price From" type="text" pInputText formControlName="priceFrom"
+                    value="{{m2(selectedOrder?.orderDetails?.createdAt).format('DD-MM-YYYY')}}" readonly />
+                </div>
+                <div class="flex flex-col gap-1">
+                  <label class="block mb-1">Checkout At</label>
+                  <input title="Price From" type="text" pInputText formControlName="priceFrom"
+                    value="{{m2(selectedOrder?.orderDetails?.checkoutAt).format('DD-MM-YYYY')}}" readonly />
+                </div>
+              </div>
               <p-table [value]="productList()" dataKey="id" [paginator]="true" [rows]="5">
                 <ng-template pTemplate="header">
                   <tr>
@@ -27,7 +45,7 @@
                   </tr>
                 </ng-template>
                 <ng-template pTemplate="body" let-order>
-                  <tr>
+                  <tr class="{{order?.products === undefined ? 'overlay-custom-text-product-deleted' : ''}}">
                     <td>{{order?.products?.id}}</td>
                     <td>{{order?.products?.name}}</td>
                     <td>{{order?.products?.category}}</td>

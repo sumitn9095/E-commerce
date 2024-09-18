@@ -27,13 +27,30 @@ export class CartService {
   public birthDate:WritableSignal<any> = signal(Date());
 
 
-  onDetectChangeSideCart : WritableSignal<boolean> = signal(false);
+  onDetectChangeSideCart : WritableSignal<boolean> = signal(true);
 
   constructor() { }
 
   toggleSideCartPanel(){
     // this.onDetectChange.set(Math.random()*4);
-    this.onDetectChangeSideCart.update(v => !v);
+    this.onDetectChangeSideCart.update(v => true);
+    this.temp_cart.update(()=>this.cart());
+    this.cart.update(computed(()=>this.temp_cart()));
+  }
+
+  openSideCartPanel(){
+    // this.onDetectChange.set(Math.random()*4);
+    this.onDetectChangeSideCart.update(v => false);
+    setTimeout(() => {
+      this.onDetectChangeSideCart.update(v => true);
+       this.temp_cart.update(()=>this.cart());
+      this.cart.update(computed(()=>this.temp_cart()));
+    }, 400);
+   
+  }
+  closeSideCartPanel(){
+    // this.onDetectChange.set(Math.random()*4);
+    this.onDetectChangeSideCart.update(v => false);
     this.temp_cart.update(()=>this.cart());
     this.cart.update(computed(()=>this.temp_cart()));
   }

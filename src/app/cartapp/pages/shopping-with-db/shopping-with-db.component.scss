@@ -17,3 +17,41 @@
 .p-carousel-items-content {
   width: 100px !important;
 }
+
+.btn-add-product {
+  position: fixed;
+  bottom: 20px;
+  right: 0;
+  transform: translateX(-80px);
+}
+
+app-product-display-big-db {
+  ::ng-deep {
+    .p-carousel-indicators {
+      padding-bottom: 0 !important;
+    }
+
+    .p-carousel-item {
+      align-items: center;
+      display: flex;
+    }
+  }
+}
+
+app-sidecart {
+  ::ng-deep {
+    .p-inputtext {
+      padding: 0.25rem 0.25rem;
+    }
+
+
+
+    .p-autocomplete {
+
+      button,
+      input {
+        height: 30px;
+      }
+    }
+  }
+}

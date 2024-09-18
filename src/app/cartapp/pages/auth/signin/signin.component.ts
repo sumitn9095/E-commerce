@@ -38,6 +38,7 @@ export class SigninComponent implements OnInit {
 
   signin(){
     let payload = this.studentRegForm.value;
+    this._ms.add({ severity: 'success', key:'std', summary: `Loading...` });
     this._auth.signin(payload)
       .subscribe({
         next: (user)=>{
@@ -47,16 +48,18 @@ export class SigninComponent implements OnInit {
             this._ms.add({ severity: 'error', summary: `${user?.err?.message}` });
           } else {
             //console.log("user signedin");
-            this._ms.add({ severity: 'success', summary: `Hello, ${user?.user?.name}. Welcome to the Shop.`, detail: `You can now go product shopping.` });
+            this._ms.add({ severity: 'success', key:'std', summary: `Hello, ${user?.user?.name}. Welcome to the Shop.`, detail: `You can now go product shopping.` });
             sessionStorage.setItem("shop_token",user?.token);
             sessionStorage.setItem("shop_user_details",JSON.stringify(user?.user));
             if(user?.admin == 'true') sessionStorage.setItem("admin",user?.isAdmin);
-            this._router.navigate(['/shopping-with-db']);
+            setTimeout(() => {
+                 this._router.navigate(['/shopping-with-db']);
+            }, 3000);
           }
         },
         error: (err)=>{
           console.log("user error >>",err);
-          this._ms.add({ severity: 'error', summary: `${err?.error?.message}` });
+          this._ms.add({ severity: 'error', summary: `${err?.message}` });
         }
       })
   }

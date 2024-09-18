@@ -20,15 +20,23 @@
           [readonlyInput]="true" />
       </div>
     </div>
-    <div class="flex flex-col gap-1">
-      <label for="username" class="block mb-1">Price Range</label>
-      <p-inputGroup>
-        <input title="Price From" type="number" pInputText formControlName="priceFrom" [value]="priceFrom" readonly />
-        <input title="Price To" type="number" pInputText formControlName="priceTo" [value]="priceTo"
-          [defaultValue]="maxProductPrice()" readonly />
-      </p-inputGroup>
-      <p-slider [(ngModel)]="rangeValues" [range]="true" formControlName="price" (onChange)="displayPriceStatus($event)"
-        (onSlideEnd)="filterProducts()" />
+    <div class="flex justify-between items-top gap-8">
+      <div class="flex flex-col gap-1">
+        <label for="username" class="block mb-1">Price Range</label>
+        <p-inputGroup>
+          <input title="Price From" type="number" pInputText formControlName="priceFrom" [value]="priceFrom" readonly />
+          <input title="Price To" type="number" pInputText formControlName="priceTo" [value]="priceTo"
+            [defaultValue]="priceTo" readonly />
+        </p-inputGroup>
+        <p-slider [(ngModel)]="rangeValues" [range]="true" formControlName="price"
+          (onChange)="displayPriceStatus($event)" (onSlideEnd)="filterProducts()" />
+      </div>
+
+      <div class="flex flex-col gap-1">
+        <label class="block mb-1">&nbsp;</label>
+        <p-button label="Reset" icon="pi pi-download" (click)="resetFilters()" severity="danger" [size]="'small'" />
+      </div>
     </div>
+
   </div>
 </form>

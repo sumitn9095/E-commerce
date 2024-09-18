@@ -1,13 +1,21 @@
-<app-header></app-header>
-
+<app-header [cartQty]="cart_qty().length"></app-header>
+<p-toast key="std"></p-toast>
+<p-dialog #showLoaderDialog [header]="'Loader'" [modal]="true" [(visible)]="showLoader" [style]="{ width: '50rem' }"
+  [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [maximizable]="true">
+  <p-progressBar [value]="progressValue"></p-progressBar>
+</p-dialog>
 <div class="">
-  <div class="m-3 sm:w-9/12 mx-auto">
+  <div class="m-3 sm:w-full md:w-10/12 mx-auto">
     <!-- <app-shopping-list-db></app-shopping-list-db> -->
+
+    @if(pageIs === 'product' || pageIs === null){
+    <!-- Table data filters -->
     <div class="card flex justify-content-center">
-      <app-shopping-filters [categoryListDefined]="categoryListDefined" [maxProductPrice]="maxProductPrice"
+      <app-shopping-filters [categoryListDefined]="categoryListDefined" [maxProductPrice]="maxProductPrice()"
         (payloadShoppingFilterValue)="filterProducts($event)"></app-shopping-filters>
     </div>
 
+    <!-- Table structure data -->
     <p-panel header="Header">
       @defer (on viewport; prefetch on timer(0)) {
       <div class="form-group">
@@ -16,25 +24,64 @@
         <div class="flex items-start justify-center">
           <div class="w-full mx-auto">
             <div class="card">
-              <p-button label="Buy" icon="pi pi-check" (click)="singleReq_addProducts()" [size]="'small'" />
-              <p-button label="Download Products PDF" icon="pi pi-download" (click)="processDownloadProductPDF()"
-                severity="secondary" [size]="'small'" />
-              <p-button label="Download Products Excel" icon="pi pi-download" (click)="processDownloadProductExcel()"
-                severity="secondary" [size]="'small'" />
+              <div class="flex justify-between">
+                <p-button label="Buy" icon="pi pi-check" (click)="singleReq_addProducts()" [size]="'small'" />
+                <div class="flex gap-3">
+                  @if(user?.admin) {
+                  <input #uploadExcel value="Upload Products Excel" type="file"
+                    class="p-ripple p-element p-button p-component p-button-warning p-button-sm"
+                    [style.visibility]="'hidden'" (change)="processUploadProductExcel($event)" />
+
+                  <p-button label="Upload Products Excel" icon="pi pi-upload"
+                    (click)="showProcessUploadExcelOption = true;" severity="secondary" [size]="'small'" />
+
+                  <p-dialog #uploadProductsReplaceAppend [header]="'Upload Products Excel'" [modal]="true"
+                    [(visible)]="showProcessUploadExcelOption" [style]="{ width: '50rem' }"
+                    [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [maximizable]="true">
+                    <h4>Do you want to "Replace" or "Append" the products after Uploading Products Excel sheet ?</h4>
+                    <p>Note: If you choose "Append", then the total products uploaded will be not more than 10. if
+                      products are already there, and they are lss than 10, then only the difference in the qty, will be
+                      uploaded. Eg: if 4 products are there, and products you are trying to upload are 7, then only 6
+                      will be uploaded, which takes the quantity to 10 (4+6).</p>
+                    <p>With "replace" all the prev products will be removed. And 10 fresh products will be uploaded from
+                      the Excel.</p>
+                    <div class="flex justify-end items-end pt-8 gap-2">
+                      <div></div>
+                      <div class="flex gap-4">
+                        <p-button label="Replace" [size]="'small'" severity="secondary" type="button"
+                          (click)="uploadExcel.click();uploadExcelReplace=true;showProcessUploadExcelOption = false;" />
+                        <p-button label="Append" [size]="'small'" severity="info"
+                          (click)="uploadExcel.click();uploadExcelReplace=false;showProcessUploadExcelOption = false;"
+                          type="button" />
+                      </div>
+                    </div>
+                  </p-dialog>
+                  }
+                  <p-button label="Download Products PDF" icon="pi pi-download" (click)="processDownloadProductPDF()"
+                    severity="secondary" [size]="'small'" />
+                  <p-button label="Download Products Excel" icon="pi pi-download"
+                    (click)="processDownloadProductExcel('product')" severity="secondary" [size]="'small'" />
+                  <!-- <p-button label="Upload Products Excel" icon="pi pi-upload" [type]="'file'"
+                    (change)="processUploadProductExcel($event)" severity="warning" [size]="'small'" /> -->
+
+
+                </div>
+              </div>
               <p-table [value]="products().products" [(selection)]="selectedProducts" dataKey="id">
                 <ng-template pTemplate="header">
                   <tr>
                     <th style="width: 4rem">
                       <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
                     </th>
-                    <th>Id</th>
                     <th>Image</th>
+                    <th>Id</th>
                     <th>Name</th>
                     <th>Category</th>
                     <th>InStock</th>
                     <th>Price</th>
                     <th>Manufacturing Date</th>
                     <th>Expiry Date</th>
+                    <th>Availability span (days)</th>
                     <th>Action</th>
                   </tr>
                 </ng-template>
@@ -44,40 +91,36 @@
                       <p-tableCheckbox [value]="product"></p-tableCheckbox>
                     </td>
                     <td>
-                      @if(product.imagePath.length) {
-                      <div class="flex">
-                        <p-carousel [value]="product.imagePath" [numVisible]="1" [numScroll]="1" [circular]="false">
-                          <ng-template let-product pTemplate="item">
-                            <!-- @for (item of product.imagePath; track '_id') { -->
-                            <!-- <div class="imgBox" [style]="'background:url('+ env + item +')'"></div> -->
-                            <div class="imgBox">
-                              <img [alt]="product" [title]="product" [src]="env + product" />
-                            </div>
-                            <!-- } -->
-                          </ng-template>
-                        </p-carousel>
-                      </div>
-                      }
+                      <img title="{{ product?.name }}"
+                        class="rounded-md w-20 sm:w-16rem shadow-2 block xl:block mx-auto border-round" [src]="!product?.imagePath?.length ? 'https://placehold.co/150x150?text='+product?.name :
+                            server_url + product?.imagePath[0] " [alt]="'{{ product?.name }}'" />
                     </td>
-                    <td>{{product.id}}</td>
-                    <td>{{product.name}}</td>
-                    <td>{{product.category}}</td>
-                    <td>{{product.instock}}</td>
-                    <td>{{product.price}}</td>
-                    <td>{{product.md}}</td>
-                    <td>{{product.ed}}</td>
+                    <td>{{product?.id}}</td>
+                    <td>{{product?.name}}</td>
                     <td>
-                      @if(this.user.admin){
+                      <p-button class="" [label]="product?.category" (click)="view('category',product?.category)"
+                        [size]="'small'" [rounded]="true" severity="secondary" />
+                    </td>
+                    <td>{{product?.instock}}</td>
+                    <td>{{product?.price}}</td>
+                    <td>{{ m2(product?.md).format("DD-MM-YYYY") }}</td>
+                    <td>{{ m2(product?.ed).format("DD-MM-YYYY") }}</td>
+                    <td>{{ m2(product?.ed).diff(m2(product?.md), 'days')}}</td>
+                    <td>
+                      @if(user?.admin){
                       <p-button class="" icon="pi pi-file-edit"
-                        (click)="showAddEditPoductModal = true; editProduct(product)" [rounded]="true"
-                        severity="success" />
-                      <p-button class="" icon=" pi pi-trash" (click)="removeProduct(product._id)" [rounded]="true"
+                        (click)="shouldAddNewProduct=false;showAddEditPoductModal = true; editProduct(product)"
+                        [rounded]="true" severity="success" />
+                      <p-button class="" icon=" pi pi-trash" (click)="removeProduct(product?._id)" [rounded]="true"
                         severity="danger" />
                       } @else {
+                      @if(product?.instock){
                       <p-button class="" icon=" pi pi-plus" (click)="addProduct(product)" [rounded]="true"
                         severity="success" />
-
                       }
+                      }
+                      <p-button class="" icon=" pi pi-eye" (click)="view('product',product?.id)" [rounded]="true"
+                        severity="secondary" />
                     </td>
                   </tr>
                 </ng-template>
@@ -101,20 +144,67 @@
       }
     </p-panel>
 
-    <button type="button" (click)="productImgToBeUploaded = []; progressAddEditFormUploadImgs=0; shouldAddNewProduct =
-      true;addNewProduct()">AddProduct</button>
+    <!-- Table data filters -->
+    <!-- <p-button icon="pi pi-plus" class="absolute bottom-10 right-10" severity="success" /> -->
+    <p-button class="btn-add-product" title="Add Products" icon="pi pi-plus"
+      (click)="productImgToBeUploaded = []; progressAddEditFormUploadImgs=0; shouldAddNewProduct = true;addNewProduct()"
+      [rounded]="true" severity="success" [size]="'large'" />
+    }
+    @if(pageIs === 'productDetails'){
 
-    @if(this.user.admin){
-    <p-dialog #AddEditPoductModal [header]="'Edit Product'" [modal]="true" [(visible)]="showAddEditPoductModal"
-      [style]="{ width: '50rem' }" [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [maximizable]="true">
+    <!-- <div>
+      @if(selectedProductDetails?.imagePath?.length) {
+      <div class="flex">
+        <p-carousel [value]="selectedProductDetails?.imagePath" [numVisible]="1" [numScroll]="1" [circular]="false">
+          <ng-template let-product pTemplate="item">
+            <div class="imgBox">
+              <img [alt]="product" [title]="product" [src]="env + product" />
+            </div>
+            
+          </ng-template>
+        </p-carousel>
+      </div>
+      } @else {
+      <img title="{{ selectedProductDetails?.name }}"
+        class="w-20 sm:w-16rem shadow-2 block xl:block mx-auto border-round"
+        [src]="'https://placehold.co/84x84?text='+ selectedProductDetails?.name "
+        [alt]="'{{ selectedProductDetails?.name }}'" />
+      }
+    </div> -->
+
+    <app-product-display-big-db [item]="selectedProductDetails" [mode]="'read'" [productView]="true"
+      (evt)="$event.type !== 'buy' ? removeProduct($event.product?._id) : addProduct($event.product)">
+    </app-product-display-big-db>
+
+    } @if(pageIs === 'category') {
+    <!-- categoryListDefined -- {{categoryListDefined}} -->
+    <div class="grid grid-cols-2 gap-4">
+      @for(cat of categoryListDefined?.categories; track cat) {
+      <a class="transition-colors py-10 flex justify-center cursor-pointer bg-slate-900 dark:bg-slate-1100 rounded-lg hover:bg-slate-700"
+        (click)="view('category',cat)">
+        {{cat}}
+      </a>
+      }
+    </div>
+    }
+
+
+
+    @if(user?.admin){
+
+    @if(pageIs === 'product' || pageIs === null){
+    <!-- Add / Edit Product -->
+    <p-dialog #AddEditPoductModal [header]="shouldAddNewProduct ? 'Add Product' : 'Edit Product'" [modal]="true"
+      [(visible)]="showAddEditPoductModal" [style]="{ width: '50rem' }"
+      [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [maximizable]="true">
       <form [formGroup]="addEditProductForm" class="add-edit-product-form" enctype="multipart/form-data"
         (ngSubmit)="processAddEditProductForm()">
 
-        <div class="grid grid-cols-2 gap-4">
-          <div class="flex flex-col gap-2">
+        <div class="grid grid-cols-2 gap-4 ">
+          <div class="flex flex-col gap-2 ">
             <label for="username">Name</label>
             <input pInputText formControlName="name"
-              [ngModel]="productToBeEdited !== null ? productToBeEdited.name : ''" [size]="'large'" />
+              [ngModel]="productToBeEdited !== null ? productToBeEdited.name : ''" />
           </div>
           <div class="flex flex-col gap-2">
             <label for="username">Category</label>
@@ -123,22 +213,22 @@
               [dropdown]="true" formControlName="category" styleClass="w-full" />
           </div>
         </div>
-        <div class="grid gap-4">
+        <div class="grid gap-4  mt-4">
           <div class="flex flex-col gap-2">
             <label for="username">Images</label>
             @if(productToBeEdited?.imagePath?.length) {
             <div class="flex">
               <!-- <p-carousel [value]="productToBeEdited.imagePath" [numVisible]="1" [numScroll]="1" [circular]="false">
-                  <ng-template let-product pTemplate="item"> -->
+                          <ng-template let-product pTemplate="item"> -->
               @for (item of productToBeEdited?.imagePath; track '_id') {
               <div class="imgBox">
-                <p-button class="absolute top-2 right-2" icon=" pi pi-times "
+                <p-button class="absolute top-2 right-2" icon=" pi pi-times"
                   (click)="removeProductImg(productToBeEdited.id,item)" [rounded]="true" severity="danger" />
-                <img [alt]="item" [title]="item" [src]="env + item" />
+                <img [alt]="item" [title]="item" [src]="server_url + item" />
               </div>
               }
               <!-- </ng-template>
-                </p-carousel> -->
+                        </p-carousel> -->
             </div>
             }
           </div>
@@ -159,19 +249,19 @@
             </ng-template>
 
             <!-- <p-fileUpload name="img" (onUpload)="handleProductImgFileupload($event)" (onSelect)="onSelect($event)"
-              (uploadHandler)="uploadHandler($event)"
-              (onSend)="onSend($event)" [multiple]="true" accept="image/*" maxFileSize="1000000">
-              <ng-template pTemplate="content">
-                <ul *ngIf="uploadedFiles.length">
-                  <li *ngFor="let file of uploadedFiles">
-                    {{ file.name }} - {{ file.size }} bytes
-                  </li>
-                </ul>
-              </ng-template>
-            </p-fileUpload> -->
+                      (uploadHandler)="uploadHandler($event)"
+                      (onSend)="onSend($event)" [multiple]="true" accept="image/*" maxFileSize="1000000">
+                      <ng-template pTemplate="content">
+                        <ul *ngIf="uploadedFiles.length">
+                          <li *ngFor="let file of uploadedFiles">
+                            {{ file.name }} - {{ file.size }} bytes
+                          </li>
+                        </ul>
+                      </ng-template>
+                    </p-fileUpload> -->
           </div>
         </div>
-        <div class="grid grid-cols-2 gap-4">
+        <div class="grid grid-cols-2 gap-4  mt-4">
           <div class="flex flex-col gap-2">
             <label for="username">Price</label>
             <input pInputText formControlName="price" [type]="'number'"
@@ -180,18 +270,20 @@
           <div class="flex flex-col gap-2">
             <label for="username">InStock</label>
             <p-autoComplete [dropdown]="true" [ngModel]="productToBeEdited !== null ? productToBeEdited.instock ? 'In Stock' : 'Out of Stock' :
-                  true" [suggestions]="stockOptions"
+                          true" [suggestions]="stockOptions"
               (completeMethod)="stockOptions=[{name:'In Stock',value:true},{name:'Out of Stock', value:false}]"
               optionLabel="name" name="instock" formControlName="instock" styleClass="w-full" />
           </div>
         </div>
-        <div class="grid grid-cols-5 gap-4 ">
+        <div class="grid grid-cols-5 gap-4  mt-4">
           <div class="col-span-2 flex flex-col gap-2">
             <label for="username">Manufacturing Date</label>
             <p-calendar [(ngModel)]="productToBeEdited_md_date" [dateFormat]="'dd/mm/yy'" formControlName="md"
               [style]="{'width':'100%'}" [inline]="true" (onClose)="selectDate($event)" styleClass="w-full" />
           </div>
-          <div class="flex flex-col gap-2">23 days</div>
+          <div class="flex flex-col gap-2 justify-center items-center">
+            <!-- 23 days -->
+          </div>
           <div class="col-span-2 flex flex-col gap-2">
             <label for="username">Expiry Date</label>
             <p-calendar [(ngModel)]="productToBeEdited_ed_date" [dateFormat]="'dd/mm/yy'" formControlName="ed"
@@ -200,19 +292,24 @@
         </div>
 
         <!-- <ng-template pTemplate="footer"> -->
-        <div class="flex justify-end items-end pt-8 gap-2">
-          <div>
-            <p-button label="Cancel" [size]="'small'" severity="secondary" />
-            <p-button label="Proceed" [size]="'large'" type="submit" />
+        <div class="flex justify-end items-end pt-8 gap-2  mt-4">
+          <div class="flex gap-4">
+            <p-button label="Cancel" severity="secondary" />
+            <p-button label="Proceed" severity="success" type="submit" />
           </div>
         </div>
         <!-- </ng-template> -->
       </form>
     </p-dialog>
-    } @else {
+    }
+    }
+
+    @if(!user?.admin){
+    <!-- Cart -->
     <app-sidecart [detectChange]="_cart.onDetectChangeSideCart()" [cart]="_cart.cart()" [cartSpecs]="cartSpecs()"
-      [orderId]="orderId" [categoryListDefined]="categoryListDefined" [maxProductPrice]="maxProductPrice"
-      (filterQuery)="filter_cart($event)" (fetchCartOutput)="fetch_cart()">
+      [orderId]="orderId" [categoryListDefined]="categoryListDefined" [maxProductPrice]="maxProductPrice()"
+      (filterQuery)="filter_cart($event)" (fetchCartOutput)="fetch_cart()" (eventProduct)="$event.downloadType ===
+      'excel' ? processDownloadProductExcel('cart') : processDownloadProductPDF('cart')">
     </app-sidecart>
 
     <!-- Product Add Toast Notification -->
@@ -222,7 +319,7 @@
           <div>
             <img title="{{ latestProductAdded.product.name }}" class="shadow-2 block xl:block mx-auto border-round"
               [src]="'https://placehold.co/362x180?text='+ (message.data.type === 'single' ?
-                      message.data.product.name : message.data.productNames.toString()) "
+                        message.data.product.name : message.data.productNames.toString()) "
               [alt]="'{{ message.data.product.name}}'" />
           </div>
           <div>

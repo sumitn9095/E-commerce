@@ -9,9 +9,10 @@ import { Observable } from 'rxjs';
 import { ProductDisplayBigDbComponent } from "../product-display-big-db/product-display-big-db.component";
 import { ShopService } from '../../utility/shop.service';
 import { ShoppingFiltersComponent } from '../shopping-filters/shopping-filters.component';
-import { HttpResponse } from '@angular/common/http';
+import { HttpEventType, HttpResponse } from '@angular/common/http';
 import { DialogModule } from 'primeng/dialog';
 import { ButtonModule } from 'primeng/button';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-sidecart',
@@ -34,6 +35,9 @@ export class SidecartComponent implements OnInit {
   filterQuery = output<any>();
   fetchCartOutput = output<any>();
   showReviewCartModal:boolean=false
+  _router = inject(Router)
+
+  eventProduct = output<any>({})
 
   categoryListDefined = input<any[]>([])
   maxProductPrice = input<number>(0);
@@ -43,7 +47,7 @@ export class SidecartComponent implements OnInit {
 
   //thiscart = computed(() => this.cart());
   cartPrice = computed(() => Math.round(this.calcCartPrice()));
-  totalQty = computed(() => this.cartSpecs().reduce((acc:any, item:any)=> parseInt(acc + item?.qty),0));
+  totalQty = computed(() => this.cartSpecs().reduce((acc:any, item:any)=> item?.price !== undefined ? parseInt(acc + item?.qty) : acc ,0));
   gst = computed(() => Math.round(this.cartPrice() * 18) / 100);
   deliveryCharges = computed(() => this.cartPrice() > 500 ? 0 : 100);
   cartTotalPrice = computed(() => this.cartPrice() + this.gst() + this.deliveryCharges());
@@ -52,7 +56,9 @@ export class SidecartComponent implements OnInit {
     // --- this 'computed' updates cartCopy only initially
     this.cartCopy.set([])
     setTimeout(() => {
-        this.cartCopy.update( ()=>[...this.cartSpecs()] )
+        //this.cartCopy.update( ()=>[...this.cartSpecs()] )
+        let tempCart = this.cartSpecs().filter(k => k.qty !== 0 && k.price !== undefined)
+        this.cartCopy.update(() => [...tempCart]);
         console.log("this.cartCopy",this.cartCopy())
     }, 300);
 
@@ -65,6 +71,7 @@ export class SidecartComponent implements OnInit {
       console.log("this.categoryListDefined",this.categoryListDefined())
       console.log("maxProductPrice",this.maxProductPrice())
       this.isTrueSet = (!this.detectChange());
+      console.log("this.isTrueSet",this.isTrueSet);
     })
   }
 
@@ -85,7 +92,8 @@ export class SidecartComponent implements OnInit {
 
   calcCartPrice = () => {
     return this.cartSpecs().reduce((acc:any, item:any) => {
-      let totalIndividualProductPrice:number = item?.qty * parseInt(item?.price);
+      let totalIndividualProductPrice:number=0;
+      if(item?.price !== undefined) totalIndividualProductPrice = item?.qty * parseInt(item?.price);
       return parseInt(acc + totalIndividualProductPrice);
     },0);
   }
@@ -105,7 +113,7 @@ export class SidecartComponent implements OnInit {
   // }
 
   filterProducts(payload:{}) {
-    this.filterQuery.emit(payload);
+    this.filterQuery.emit(payload)
   }
 
   reviewCart(){
@@ -118,7 +126,7 @@ export class SidecartComponent implements OnInit {
         //     }
         //   )
         // })
-      let tempCart = this.cartSpecs().filter(k => k.qty !== 0)
+      let tempCart = this.cartSpecs().filter(k => k.qty !== 0 && k.price !== undefined)
       this.cartCopy.update(() => [...tempCart]);
 
     //}, 300);
@@ -130,7 +138,10 @@ export class SidecartComponent implements OnInit {
   checkout() {
     this._shop.cartCheckout().subscribe({
       next:(response)=>{
-        if(response.response.acknowledged) this.fetchCartOutput.emit("checkout completed");
+        if(response.response.acknowledged) {
+          this.fetchCartOutput.emit("checkout completed");
+          this._router.navigate(['../shopping-with-db'])
+        }
       },
       error:()=>{
         //---
@@ -172,5 +183,69 @@ export class SidecartComponent implements OnInit {
 
 
   }
+
+  eventProductF = (data:any) => this.eventProduct.emit({type:'cart',downloadType:data});
   
+  // processDownloadProductPDF(){
+  //   this._shop.downloadPDF('downloadPDF').subscribe({
+  //     next: (event:any) => {
+
+  //     //  console.log("event",event)
+  //     // // const jsonString = JSON.stringify(event);
+  //     //  let blob = new Blob([event.body], {type: "application/pdf"})
+  //     //   saveAs(blob,`products3.pdf`);
+
+  //       if (event.type == HttpEventType.Sent) {
+  //         console.log("upload started - ")
+  //       } else if(event.type == HttpEventType.DownloadProgress) {
+  //         let progress = (100 * event.loaded) / event.total;
+  //         console.log("upload progress - ", progress);
+  //       } else if(event instanceof HttpResponse) {
+  //         console.log("upload completed - ",event.body);
+  //         // let binaryData = [];
+  //         //   binaryData.push(event.body);
+  //         // let llop = new Uint8Array(event.body, 0, event.body.byteLength)
+  //         //  let kkj = event.body['[Uint8Array]'];
+  //         let buffer:BlobPart[] = [event.body];
+
+  //         //var uint8View = new Uint8Array([event.body]);
+          
+  //         /////let blob = new Blob(buffer, { type: "application/octet-stream" });
+  //         //var file = new File([event.body], "MyTasks", {type: 'application/pdf'});
+  //         var file = new File([event.body], "", {type: 'text/plain'});
+  //         // const blob = new Blob([event.body], {
+  //         //   type: 'application/pdf',
+  //         // });
+  //         console.log("processDownloadProductPDF-blob",file)
+
+  //         saveAs(file,"Products.txt");
+  //         //const blob = new Blob([response.data], {type: 'application/pdf'})
+  //         // const link = document.createElement('a')
+  //         // link.href = window.URL.createObjectURL(blob)
+  //         // link.download = `your-file-name.pdf`
+  //         // link.click()
+
+  //       }
+  //     },
+  //     error: (err:Error)=>console.error(err)
+  //   })
+  // }
+
+  // processDownloadProductExcel(){
+  //   this._shop.downloadProductExcel('downloadProductExcel',this.filterFormValue).subscribe({
+  //     next: (event:any) => {
+  //       if (event.type == HttpEventType.Sent) {
+  //         console.log("upload started - ")
+  //       } else if(event.type == HttpEventType.DownloadProgress) {
+  //         let progress = (100 * event.loaded) / event.total;
+  //         console.log("download progress - ", progress);
+  //       } else if(event instanceof HttpResponse) {
+  //         console.log("upload completed - ",event.body);
+  //         var file = new File([event.body], "MyTasks", {type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+  //         saveAs(file);
+  //       }
+  //     },
+  //     error: (err:Error)=>console.error(err)
+  //   })
+  // }
 }

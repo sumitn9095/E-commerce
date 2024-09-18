@@ -26,6 +26,7 @@
     "express": "^4.18.2",
     "file-saver": "^2.0.5",
     "lodash": "^4.17.21",
+    "moment": "^2.30.1",
     "ngx-pagination": "^6.0.3",
     "primeicons": "^6.0.1",
     "primeng": "^17.18.6",

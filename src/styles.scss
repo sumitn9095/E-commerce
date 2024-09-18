@@ -36,3 +36,38 @@
     height: 1.3rem !important;
   }
 }
+
+
+
+.overlay-custom-text-product-deleted {
+  text-align: center;
+  position: relative;
+  top: 0;
+  height: 80px;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: black;
+  opacity: 0.3;
+
+  &:after {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    left: 0;
+    right: 0;
+    content: "Product Deleted";
+    padding: 2px 6px;
+    border: 1px solid white;
+    display: flex;
+    width: 160px;
+    text-align: center;
+    justify-content: center;
+    justify-self: center;
+  }
+}
+
+.overlay-custom-text-product-deleted-cart {
+  @extend .overlay-custom-text-product-deleted;
+  height: auto !important;
+}

@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, signal, WritableSignal } from '@angular/core';
 import { ShopService } from '../../utility/shop.service';
 import { HttpResponse } from '@angular/common/http';
 import { ShoppingListComponent } from '../shopping-list/shopping-list.component';
@@ -35,7 +35,7 @@ export class ShoppingListDbComponent implements OnInit {
   public categoryListDefined:any=[];
  
 
-  maxProductPrice:number = 0;
+  maxProductPrice:WritableSignal<number> = signal(0);
 
   constructor(){
     this.buyProductsForm = this._fb.group({
@@ -122,7 +122,8 @@ export class ShoppingListDbComponent implements OnInit {
       next: (maxProduct:any) => {
         if(maxProduct instanceof HttpResponse) {
           let maxProductPrice = maxProduct.body;
-          this.maxProductPrice = maxProductPrice.product[0].price;
+          let maxProductPrice2 = maxProductPrice.product[0].price
+          this.maxProductPrice.set(maxProductPrice2);
           console.log("maxProductPrice",maxProductPrice);
           //this.rangeValues = [0,maxProductPrice.product[0].price]
         }

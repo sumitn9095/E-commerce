@@ -1,0 +1,15 @@
+p-carousel {
+  width: 320px;
+
+  .p-carousel-item {
+    display: flex !important;
+    align-items: center !important;
+  }
+
+  .imgBox {
+    img {
+      width: 224px;
+    }
+  }
+
+}

@@ -1,6 +1,10 @@
-<div class="flex flex-row xl:flex-row xl:items-start p-4 gap-4">
-  <img title="{{ item?.name }}" class="w-20 sm:w-16rem shadow-2 block xl:block mx-auto border-round"
-    [src]="'https://placehold.co/84x84?text='+ item?.name " [alt]="'{{ item?.name }}'" />
+@if(!productView()) {
+
+<!-- NOT Product View (Cart View) -->
+<div
+  class="flex flex-row xl:flex-row xl:items-start p-4 gap-4 {{item?.id === undefined ? 'overlay-custom-text-product-deleted-cart' : ''}}">
+  <img title="{{ item?.name }}" class="w-20 sm:w-16rem shadow-2 block xl:block mx-auto border-round" [src]="imgPath"
+    [alt]="'{{ item?.name }}'" />
   <div class="flex flex-row sm:flex-row justify-between items-start flex-1 gap-4">
     <div class="flex flex-col items-center sm:items-start gap-3">
       <div class="text-md font-bold text-900">{{ item?.name }}</div>
@@ -34,3 +38,82 @@
     </div>
   </div>
 </div>
+} @else {
+
+<!-- Product View -->
+<div class="bg-slate-900 dark:bg-slate-1100 !items-stretch rounded-lg p-4 flex flex-row xl:flex-row  gap-4">
+  @if(item?.imagePath?.length) {
+  <div class="flex rounded-md w-80">
+    <p-carousel [value]="item?.imagePath" [numVisible]="1" [numScroll]="1" [circular]="false">
+      <ng-template let-product pTemplate="item">
+        <div class="imgBox">
+          <img [alt]="product" [title]="product" [src]="env + product" class="rounded-md w-80" />
+        </div>
+      </ng-template>
+    </p-carousel>
+  </div>
+  } @else {
+  <img title="{{ item?.name }}" class="rounded-md w-80 sm:w-16rem shadow-2 block xl:block mx-auto border-round"
+    [src]="'https://placehold.co/150x150?text='+ item?.name " [alt]="'{{ item?.name }}'" />
+  }
+  <div class="flex flex-col justify-between items-stretch flex-1 gap-4">
+    <div class="flex flex-row w-full justify-between items-start">
+      <div class="flex flex-col items-start sm:items-start gap-3">
+        <div class="text-2xl font-light py-3">{{ item?.name }}</div>
+        <div class="flex flex-col text-left gap-3">
+          <span class="flex items-center gap-2">
+            <span class="font-regular text-gray-500">ID: </span>
+            <span class="font-regular">{{ item?.id }}</span>
+          </span>
+          <span class="flex items-center gap-2">
+            <span class="font-regular text-gray-500">Category: </span>
+            <span class="font-regular">{{ item?.category }}</span>
+          </span>
+          <span class="flex items-center gap-2">
+            <span class="font-regular text-gray-500">Manufacturing Date: </span>
+            <span class="font-regular">{{ m2(item?.md).format("DD-MM-YYYY") }}</span>
+          </span>
+          <span class="flex items-center gap-2">
+            <span class="font-regular text-gray-500">Expiry Date: </span>
+            <span class="font-regular">{{  m2(item?.ed).format("DD-MM-YYYY") }}</span>
+          </span>
+          <span class="flex items-center gap-2">
+            <span class="font-regular text-gray-500">Availability Span: </span>
+            <span class="font-regular">{{  m2(item?.ed).diff(m2(item?.md),"days") }} <span
+                class="font-regular text-gray-400">(days)</span></span>
+          </span>
+          <span class="flex items-center gap-2">
+            <span class="font-regular text-gray-500">In Stock: </span>
+            <span class="font-regular">{{  item?.instock }}</span>
+          </span>
+        </div>
+        @if(mode() !== 'read') {
+        <div class="flex items-center gap-3">
+          <button type="button" (click)="addQty()"> + </button>
+          <input title="qtyCount" type="number" [value]="qtyCount()" />
+          <button type="button" (click)="removeQty()"> - </button>
+        </div>
+        }
+      </div>
+      <div class="flex sm:flex-column align-items-center sm:align-items-end gap-3 sm:gap-2">
+        <span class="text-xl font-semibold">
+          {{ item?.price }}
+        </span>
+      </div>
+    </div>
+    @if(productView()) {
+    <div class="flex w-full justify-end items-end gap-3">
+      <div></div>
+      @if(user?.admin){
+      <p-button label="Delete" icon="pi pi-trash" (click)="eventProductAction('delete',item)" />
+      } @else {
+      @if(item?.instock){
+      <p-button label="Buy" icon="pi pi-check" (click)="eventProductAction('buy',item)" />
+      }
+      }
+
+    </div>
+    }
+  </div>
+</div>
+}

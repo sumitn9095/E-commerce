@@ -6,13 +6,15 @@ import { ShoppingComponent } from './cartapp/pages/shopping/shopping.component';
 import { ShoppingWithDbComponent } from './cartapp/pages/shopping-with-db/shopping-with-db.component';
 import { ShoppingListDbComponent } from './cartapp/components/shopping-list-db/shopping-list-db.component';
 import { authGuard } from './cartapp/pages/auth/auth.guard';
+import { CategoryComponent } from './cartapp/pages/category/category.component';
+import { ProductComponent } from './cartapp/pages/product/product.component';
 
 export const routes: Routes = [
   { path: 'test', component: TestComponent },
   { path: 'defer', component: DeferComponent },
   // {path: 'student-registration', component: StudentRegisterComponent},
   {
-            path: 'new-feature-model',
+    path: 'new-feature-model',
     loadComponent: () =>
       import('./new-feature-model/new-feature-model.component').then(
         (m) => m.NewFeatureModelComponent
@@ -53,6 +55,7 @@ export const routes: Routes = [
   },
   {
     path: 'shopping',
+    canActivate: [authGuard],
     loadComponent: () =>
       import('./cartapp/pages/shopping/shopping.component').then(
         (m) => m.ShoppingComponent
@@ -94,8 +97,24 @@ export const routes: Routes = [
   },
   {
     path: 'cart-history',
+    canActivate: [authGuard],
     loadComponent: ()=>import('./cartapp/pages/cart-history/cart-history.component').then((m)=>m.CartHistoryComponent)
-  }
+  },
+  {
+    path: 'category', canActivate: [authGuard], loadComponent: ()=>import('./cartapp/pages/shopping-with-db/shopping-with-db.component').then((m)=>m.ShoppingWithDbComponent)
+  },
+  {
+    path: 'category/:slug',
+    canActivate: [authGuard],
+    loadComponent: ()=>import('./cartapp/pages/shopping-with-db/shopping-with-db.component').then((m)=>m.ShoppingWithDbComponent)
+  },
+  {
+    path: 'product/:id',
+    canActivate: [authGuard],
+    loadComponent: ()=>import('./cartapp/pages/shopping-with-db/shopping-with-db.component').then((m)=>m.ShoppingWithDbComponent)
+  },
+  { path: '', redirectTo: 'signin', pathMatch: 'full' },
+  // { path: '**', component: ErrorComponent }
   // {
   //     path: 'shopping/rxjs',
   //     loadComponent: ()=>import('./cartapp/components/shopping-list-rxjs/shopping-list-rxjs.component').then(m=>m.ShoppingListRxjsComponent)
