@@ -13,11 +13,13 @@ import { HttpEventType, HttpResponse } from '@angular/common/http';
 import { DialogModule } from 'primeng/dialog';
 import { ButtonModule } from 'primeng/button';
 import { Router } from '@angular/router';
+import { MessageService } from 'primeng/api';
+import { ToastModule } from 'primeng/toast';
 
 @Component({
   selector: 'app-sidecart',
   standalone: true,
-  imports: [SidebarModule, DataViewModule, ProductDisplayBigComponent, AsyncPipe, ProductDisplayBigDbComponent, ShoppingFiltersComponent, DialogModule, ButtonModule],
+  imports: [SidebarModule, DataViewModule, ProductDisplayBigComponent, AsyncPipe, ProductDisplayBigDbComponent, ShoppingFiltersComponent, DialogModule, ButtonModule, ToastModule],
   providers: [],
   templateUrl: './sidecart.component.html',
   styleUrl: './sidecart.component.scss',
@@ -36,6 +38,7 @@ export class SidecartComponent implements OnInit {
   fetchCartOutput = output<any>();
   showReviewCartModal:boolean=false
   _router = inject(Router)
+  _ms = inject(MessageService);
 
   eventProduct = output<any>({})
 
@@ -140,11 +143,16 @@ export class SidecartComponent implements OnInit {
       next:(response)=>{
         if(response.response.acknowledged) {
           this.fetchCartOutput.emit("checkout completed");
-          this._router.navigate(['../shopping-with-db'])
+          //this._router.navigate(['../shopping-with-db']);
+          
+          this._ms.add({ key: 'std', severity: 'success', icon:'pi pi-check-circle', summary: `Order Id: ${response.orderId} successfully checked-out.` });
+          setTimeout(() => {
+           location.reload(); 
+          }, 3000);
         }
       },
       error:()=>{
-        //---
+        this._ms.add({ key: 'std', severity: 'error', summary: `Order cannot be checked-out.` });
       }
     })
   }

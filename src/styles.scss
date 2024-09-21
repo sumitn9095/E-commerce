@@ -11,6 +11,8 @@
 @import "primeicons/primeicons.css";
 
 
+$pc:#5A31F4;
+
 .p-sidebar-right {
   width: 34rem;
 }
@@ -70,4 +72,27 @@
 .overlay-custom-text-product-deleted-cart {
   @extend .overlay-custom-text-product-deleted;
   height: auto !important;
+}
+
+.p-toolbar {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+
+form {
+  .p-autocomplete {
+    width: 100%;
+  }
+}
+
+
+button {
+  &.p-button-icon-only {
+    &.p-button-sm {
+      padding: 12px 8px;
+      width: 34px;
+      height: 34px;
+    }
+  }
 }

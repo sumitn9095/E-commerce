@@ -3,6 +3,7 @@ import { environment } from '../../../environments/environment';
 import { HttpRequest, HttpClient, HttpResponse, HttpHeaders } from '@angular/common/http';
 import { CommonConstants } from './CommonConstants';
 import { BehaviorSubject, Observable } from 'rxjs';
+import moment, { Moment } from 'moment';
 
 @Injectable({
   providedIn: 'root'
@@ -113,11 +114,15 @@ export class ShopService {
         formData.append('img[]', files[i], files[i].name);
       };
     }
+    //let md1 = moment(payload?.md).format('DD-MM-YYYY');
+    let md2 = moment(payload?.md).toISOString()
+    //let ed1 = moment(payload?.ed).format('DD-MM-YYYY');
+    let ed2 = moment(payload?.ed).toISOString()
     formData.append('name',payload?.name);
     formData.append('email',this.user?.email);
     formData.append('category',payload?.category);
-    formData.append('md',payload?.md);
-    formData.append('ed',payload?.ed);
+    formData.append('md',md2);
+    formData.append('ed',ed2);
     formData.append('price',payload?.price);
     formData.append('instock',payload?.instock);
 

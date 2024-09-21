@@ -15,13 +15,15 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ShoppingFiltersComponent } from '../../components/shopping-filters/shopping-filters.component';
 import { HttpResponse } from '@angular/common/http';
 import moment, { Moment } from 'moment';
+import { CommonConstants } from '../../utility/CommonConstants';
+import { DividerModule } from 'primeng/divider';
 
 @Component({
   selector: 'app-cart-history',
   standalone: true,
     imports: [
      HeaderComponent,  ToastModule, FormsModule, ReactiveFormsModule, ShoppingFiltersComponent,
-     ButtonModule, PanelModule, TableModule, SkeletonModule, InputTextModule, ProgressSpinnerModule,  InputGroupAddonModule, InputGroupModule, DropdownModule],
+     ButtonModule, PanelModule, TableModule, SkeletonModule, InputTextModule, DividerModule, ProgressSpinnerModule,  InputGroupAddonModule, InputGroupModule, DropdownModule],
   templateUrl: './cart-history.component.html',
   styleUrl: './cart-history.component.scss'
 })
@@ -31,7 +33,7 @@ export class CartHistoryComponent implements OnInit {
   allOrderData:any;
   selectedOrder:any;
   selectedOrderName:any;
-  categoryListDefined:any=[];
+  categoryListDefined:any=CommonConstants.categoriez();
   maxProductPrice:number=0;
   filterQuery = output<any>();
   productList:WritableSignal<any> = signal([]);
@@ -45,7 +47,7 @@ export class CartHistoryComponent implements OnInit {
 
   ngOnInit(): void {
     this.fetchCartHistory();
-    this.getCategoryList();
+    //this.getCategoryList();
     this.getMaxProductPrice();
   }
 
@@ -63,6 +65,8 @@ export class CartHistoryComponent implements OnInit {
   }
 
   selectOrder(orderId:any) {
+    this.cartPriceTotal.set(0);
+    this.cartQtyTotal.set(0)
     ///console.log("orderId",orderId)
     this.selectedOrder = this.allOrderData.filter((ordr:any) => ordr._id === orderId.value.name)[0];
     this.productList.update(()=>[...this.selectedOrder?.orderDetails?.orderIn?.orderedProductList])
@@ -81,8 +85,8 @@ export class CartHistoryComponent implements OnInit {
           //ooo =  acc;
           console.log("selectedOrder---ooo", item?.products?.id, acc, ooo, this.cartPriceTotal(), this.cartQtyTotal());
       }
-    });
-    console.log("cartPriceTotal---cartPriceTotal",this.cartPriceTotal(),this.cartQtyTotal())
+    },0);
+    //console.log("cartPriceTotal---cartPriceTotal",this.cartPriceTotal(),this.cartQtyTotal())
   }
 
     // UNIVERSAL (action)
@@ -124,6 +128,7 @@ export class CartHistoryComponent implements OnInit {
 
   // Filtering Products in Cart
   filter_cart(payload:{}) {
+    if(this.selectedOrderName === undefined) return;
     var cart_products:any[] = [];
     //console.log("filter_cart--payloadObj",payloadObj)
     this._shop.filter_order(this.selectedOrderName.name,payload).subscribe({

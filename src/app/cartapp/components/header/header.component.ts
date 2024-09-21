@@ -35,13 +35,18 @@ export class HeaderComponent implements OnInit {
     if(this.user){
       yitems = [
           {
+              label: 'Products Showroom',
+              icon: 'pi pi-shopping-cart',
+              routerLink: ['/shopping']
+          },
+          {
               label: 'Categories',
-              icon: 'pi pi-refresh',
+              icon: 'pi pi-box',
               routerLink: ['/category']
           },
           {
               label: 'Sign Out',
-              icon: 'pi pi-upload',
+              icon: 'pi pi-sign-out',
                 command: () => {
                   this._auth.signout();
               }
@@ -53,7 +58,7 @@ export class HeaderComponent implements OnInit {
       yitems.unshift(
         {
           label: 'Cart History',
-          icon: 'pi pi-refresh',
+          icon: 'pi pi-database',
           routerLink: ['/cart-history']
         },
       )

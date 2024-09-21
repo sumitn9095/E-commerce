@@ -43,11 +43,11 @@ export class ProductDisplayBigDbComponent implements OnInit{
     this.evt.emit(updatedProdDetails)
   }
 
-  eventProductAction = (action:string, product:{}) => action === 'buy' ? this.evt.emit({type:'buy', product:product}) : this.evt.emit({type:'delete', product:product})
+  eventProductAction = (action:string, product:{}) => action === 'buy' ? this.evt.emit({type:'buy', product:product}) : action === 'delete' ? this.evt.emit({type:'delete', product:product}) : this.evt.emit({type:'edit', product:product})
 
   removeQty = () => {
-    this.qtyCount.update((q) => q < 1 ? 0 : q - 1)
-    this.emitUpdatedProdDetails()
+    this.qtyCount.update((q) => q < 1 ? 0 : q - 1);
+    this.emitUpdatedProdDetails();
     //this.qtyCount = this.qtyCount < 1 ? 0 : this.qtyCount - 1
   }
   addQty = () => {

@@ -91,7 +91,10 @@ export class ShoppingFiltersComponent implements OnInit {
       priceTo: this.maxProductPrice()
     });
     setTimeout(() => {
+        this.priceFrom=0;
+        this.priceTo=this.maxProductPrice();
         this.productsFilterGroup.patchValue({
+          priceFrom:0,
           priceTo: this.maxProductPrice()
         });
          this.filterProducts();
@@ -123,7 +126,8 @@ export class ShoppingFiltersComponent implements OnInit {
   filterMethodCategory(event:any) {
     console.log("event.query",event);
     let cl = [];
-    cl = this.categoryListDefined().categories;
+    //cl = this.categoryListDefined().categories;
+    cl = this.categoryListDefined();
     //.log("cl",cl)
     this.categoryList = ['All',...cl];
   }

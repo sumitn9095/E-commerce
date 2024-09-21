@@ -3,9 +3,21 @@
 <div class="card">
   <p-toolbar>
     <ng-template pTemplate="start">
-      <div class="flex align-items-center gap-2">
-        <i class="pi pi-cart-plus" style="font-size: 2rem"></i>
-        <!-- <span class="font-bold text-bluegray-50">{{ _cart.firstName() === '' ? _cart.firstName() :  firstName()}} {{ _cart.lastName() === '' ? _cart.lastName() : lastName() }}</span> -->
+      <div class="flex items-center gap-2">
+        <a [routerLink]="'/shopping'" class="p-menuitem-link">
+          <i class="pi pi-cart-plus" style="font-size: 2rem"></i>
+        </a>
+
+        <span class="flex flex-col items-start font-bold text-bluegray-50 mt-5 logo-link-wrap">
+          <!-- {{ _cart.firstName() === '' ? _cart.firstName() :  firstName()}} {{ _cart.lastName() === '' ? _cart.lastName() : lastName() }} -->
+          <span>
+            <p class="m-0 text-gray-400">Welcome to</p>
+          </span>
+          <a [routerLink]="'/shopping'" class="p-menuitem-link logo-link flex justify-start items-center">
+            <h4 class="m-0">sumit's</h4>
+            <img [height]="80" [src]="'../../../../assets/images/ShopApp.svg'" [title]="'Shop'" [alt]="'Shop'" />
+          </a>
+        </span>
       </div>
     </ng-template>
     <ng-template pTemplate="end">
@@ -16,16 +28,17 @@
         <i class="pi pi-user text-3xl" (click)="_auth.signout()"></i>
         <span>{{user?.name}}</span>
       </div> -->
+      <div class="flex items-center gap-5 ">
+        @if(user && !user?.admin) {
+        <div class="card flex justify-content-center">
+          <i class="pi pi-cart-plus text-3xl" pBadge [value]="cartQty()" (click)="_cart.openSideCartPanel()"></i>
+        </div>
+        }
 
-      @if(user && !user?.admin) {
-      <div class="card flex justify-content-center">
-        <i class="pi pi-cart-plus text-3xl" pBadge [value]="cartQty()" (click)="_cart.openSideCartPanel()"></i>
+        <!-- [disabled]="user?.admin || user?.admin!=='' || user!==undefined" -->
+        <p-splitButton [label]="user?.name" [hidden]="!user" [model]="items" [icon]="'pi pi-user text-1xl'" raised
+          text />
       </div>
-      }
-
-      <!-- [disabled]="user?.admin || user?.admin!=='' || user!==undefined" -->
-      <p-splitButton [label]="user?.name" [hidden]="!user" [model]="items" [icon]="'pi pi-user text-1xl'" raised text />
-
       <!-- {{_cart.sideCartOpen()}} -- _cart.sideCartOpen -->
       <!-- <div class="card flex justify-content-center">
         <div class="card flex justify-content-center">

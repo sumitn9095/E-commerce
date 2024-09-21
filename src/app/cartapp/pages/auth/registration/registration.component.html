@@ -1,80 +1,83 @@
 <!-- <app-header [firstName]="cn['firstName'].value" [lastName]="cn['lastName'].value"></app-header> -->
 <app-header></app-header>
 <div class="">
-    <div class="m-3 sm:w-8/12 mx-auto">
-        <div class="card">
-            <p-steps [model]="formSteps" [readonly]="false" [activeIndex]="activeIndex" (activeIndexChange)="onActiveIndexChange($event)"></p-steps>
-        </div>
-        <p-panel header="Header">
-                <div class="form-group">
-                    <button type="button" (click)="prevStep()"> prev </button>
-                    <button type="button" (click)="nextStep()" [disabled]="!isSectionValid"> next </button>
-                    <form [formGroup]="studentRegForm">
-                        <div [class.ht0]="this._cart.registrationStep !== 1">
-                            <div class="flex items-center gap-6  justify-center">
-                                <div class="w-full">
-                                    <label for="name">Name</label>
-                                    <input [title]="'Name'" type="text" class="w-full p-inputtext-lg" placeholder="Name" (focus)="currentInp($event)"  name="name" formControlName="name" pInputText />
-                                </div>
-                            </div>
-                            <div class="flex items-center justify-center mt-4">
-                                <div class="w-full">
-                                    <label for="birthDate">DOB</label>
-                                    <p-calendar name="birthDate" class="w-full block p-inputtext-lg" formControlName="birthDate" pInputText (onFocus)="currentInp($event)"></p-calendar>
-                                </div>
-                            </div>
-                            <div class="flex items-center justify-center mt-4">
-                                <label for="gender">Gender</label>
-                                <p-autoComplete 
-                                    [dropdown]="true" 
-                                    [suggestions]="genderOptions" 
-                                    (completeMethod)="genderOptions=['Male','Female']"
-                                    name="gender"
-                                    formControlName="gender"
-                                />
-                            </div>
-                            <div class="flex items-center justify-center mt-4">
-                                    <label for="password">Password</label>
-                                    <input [title]="'password'" type="text" class="w-full p-inputtext-lg" placeholder="password" (focus)="currentInp($event)" name="password" formControlName="password" pInputText />
-                            </div>
-                        </div>
-
-                        <div class="flex items-center justify-center mt-4" [class.ht0]="this._cart.registrationStep !== 2">
-                            <div class="w-full">
-                                <label for="occupation">occupation</label>
-                                <p-autoComplete 
-                                    styleClass="w-full p-inputtext-lg"
-                                    [dropdown]="true" 
-                                    [suggestions]="occupationOptions" 
-                                    (completeMethod)="occupationOptions=['Banking', 'Software', 'Aviation', 'Goverment service', 'Professional']"
-                                    name="occupation"
-                                    formControlName="occupation"
-                                    (onFocus)="currentInp($event)"
-                                />
-                            </div>
-                            <div class="w-full">
-                                <label for="designation">Designation</label>
-                                <input [title]="'designation'" type="text" class="w-full p-inputtext-lg" placeholder="Designation" (focus)="currentInp($event)"  name="designation" formControlName="designation" pInputText />
-                            </div>
-                        </div>
-
-                        <div class="flex items-center justify-center mt-4" [class.ht0]="this._cart.registrationStep !== 3">
-                            <div class="w-full">
-                                <label for="email">Email</label>
-                                <input [title]="'designation'" type="email" class="w-full p-inputtext-lg" placeholder="email" (focus)="currentInp($event)"  name="email" formControlName="email" pInputText />
-                            </div>
-                            <div class="w-full">
-                                <label for="phone">Phone</label>
-                                <input [title]="'Phone'" type="text" class="w-full p-inputtext-lg" placeholder="0000 0000 00" (focus)="currentInp($event)"  name="phone" formControlName="phone" pInputText />
-                            </div>
-                        </div>
-                    </form>
-                    <p-button severity="success"  (click)="processForm()" [disabled]="!isSectionValid">Proceed to Buy</p-button>
-                </div>
-        </p-panel>
+  <div class="m-3 sm:w-8/12 mx-auto">
+    <div class="card">
+      <p-steps [model]="formSteps" [readonly]="false" [activeIndex]="activeIndex"
+        (activeIndexChange)="onActiveIndexChange($event)"></p-steps>
     </div>
+    <p-panel header="Register yourself as a User">
+      <div class="form-group">
+        <div class="flex justify-end mb-3">
+          <p-inputGroup class="inline-block w-auto">
+            <button type="button" pButton icon="pi pi-arrow-left" [disabled]="_cart.registrationStep <= 1"
+              (click)="prevStep()"></button>
+            <input type="text" [value]="_cart.registrationStep" class="register-wizard-screen-no" pInputText />
+            <button type="button" pButton icon="pi pi-arrow-right" [disabled]="!isSectionValid"
+              (click)="nextStep()"></button>
+          </p-inputGroup>
+        </div>
+        <!-- <button type="button" (click)="prevStep()"> prev </button>
+        <button type="button" (click)="nextStep()" [disabled]="!isSectionValid"> next </button> -->
+        <form [formGroup]="studentRegForm">
+          <div [class.ht0]="this._cart.registrationStep !== 1" class="grid grid-cols-2 gap-4">
+            <div class="flex flex-col gap-2">
+              <label for="name">Name</label>
+              <input [title]="'Name'" type="text" class="w-full" (focus)="currentInp($event)" name="name"
+                formControlName="name" pInputText />
+            </div>
+
+            <div class="flex flex-col gap-2">
+              <label for="birthDate">DOB</label>
+              <p-calendar name="birthDate" class="w-full block" formControlName="birthDate" pInputText
+                (onFocus)="currentInp($event)"></p-calendar>
+            </div>
+            <div class="flex flex-col gap-2">
+              <label for="gender">Gender</label>
+              <p-autoComplete [dropdown]="true" class="w-full" [suggestions]="genderOptions"
+                (completeMethod)="genderOptions=['Male','Female']" name="gender" formControlName="gender" />
+            </div>
+            <div class="flex flex-col gap-2">
+              <label for="password">Password</label>
+              <input [title]="'password'" type="text" class="w-full" (focus)="currentInp($event)" name="password"
+                formControlName="password" pInputText />
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4" [class.ht0]="this._cart.registrationStep !== 2">
+            <div class="flex flex-col gap-2">
+              <label for="occupation">Occupation</label>
+              <p-autoComplete styleClass="w-full" [dropdown]="true" [suggestions]="occupationOptions"
+                (completeMethod)="occupationOptions=['Banking', 'Software', 'Aviation', 'Goverment service', 'Professional']"
+                name="occupation" formControlName="occupation" (onFocus)="currentInp($event)" />
+            </div>
+            <div class="flex flex-col gap-2">
+              <label for="designation">Designation</label>
+              <input [title]="'designation'" type="text" class="w-full" (focus)="currentInp($event)" name="designation"
+                formControlName="designation" pInputText />
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4 mt-4 mb-4" [class.ht0]="this._cart.registrationStep !== 3">
+            <div class="flex flex-col gap-2">
+              <label for="email">Email</label>
+              <input [title]="'designation'" type="email" class="w-full" (focus)="currentInp($event)" name="email"
+                formControlName="email" pInputText />
+            </div>
+            <div class="flex flex-col gap-2">
+              <label for="phone">Phone</label>
+              <input [title]="'Phone'" type="text" class="w-full" placeholder="0000 0000 00"
+                (focus)="currentInp($event)" name="phone" formControlName="phone" pInputText />
+            </div>
+          </div>
+        </form>
+        <p-button severity="success" class="flex justify-end" (click)="processForm()" [disabled]="!isSectionValid">
+          Proceed to Register</p-button>
+      </div>
+    </p-panel>
+  </div>
 </div>
 
-<p-toast position="top-right"  [baseZIndex]="5000">
-    <p>sdfdsfdf</p>
+<p-toast position="top-right" [baseZIndex]="5000">
+  <p>sdfdsfdf</p>
 </p-toast>

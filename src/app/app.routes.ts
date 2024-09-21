@@ -53,39 +53,39 @@ export const routes: Routes = [
     redirectTo: 'signin',
     pathMatch: 'full'
   },
+  // {
+  //   path: 'shopping',
+  //   canActivate: [authGuard],
+  //   loadComponent: () =>
+  //     import('./cartapp/pages/shopping/shopping.component').then(
+  //       (m) => m.ShoppingComponent
+  //     ),
+  //   children: [
+  //     {
+  //       path: 'rxjs',
+  //       loadComponent: () =>
+  //         import(
+  //           './cartapp/components/shopping-list-rxjs/shopping-list-rxjs.component'
+  //         ).then((m) => m.ShoppingListRxjsComponent),
+  //     },
+  //     {
+  //       path: 'signal',
+  //       loadComponent: () =>
+  //         import(
+  //           './cartapp/components/shopping-list-signal/shopping-list-signal.component'
+  //         ).then((m) => m.ShoppingListSignalComponent),
+  //     },
+  //     {
+  //       path: 'custom',
+  //       loadComponent: () =>
+  //         import(
+  //           './cartapp/components/shopping-list-custom/shopping-list-custom.component'
+  //         ).then((m) => m.ShoppingListCustomComponent),
+  //     },
+  //   ],
+  // },
   {
     path: 'shopping',
-    canActivate: [authGuard],
-    loadComponent: () =>
-      import('./cartapp/pages/shopping/shopping.component').then(
-        (m) => m.ShoppingComponent
-      ),
-    children: [
-      {
-        path: 'rxjs',
-        loadComponent: () =>
-          import(
-            './cartapp/components/shopping-list-rxjs/shopping-list-rxjs.component'
-          ).then((m) => m.ShoppingListRxjsComponent),
-      },
-      {
-        path: 'signal',
-        loadComponent: () =>
-          import(
-            './cartapp/components/shopping-list-signal/shopping-list-signal.component'
-          ).then((m) => m.ShoppingListSignalComponent),
-      },
-      {
-        path: 'custom',
-        loadComponent: () =>
-          import(
-            './cartapp/components/shopping-list-custom/shopping-list-custom.component'
-          ).then((m) => m.ShoppingListCustomComponent),
-      },
-    ],
-  },
-  {
-    path: 'shopping-with-db',
     canActivate: [authGuard],
     component: ShoppingWithDbComponent,
     children: [

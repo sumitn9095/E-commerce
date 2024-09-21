@@ -38,7 +38,7 @@ export class SigninComponent implements OnInit {
 
   signin(){
     let payload = this.studentRegForm.value;
-    this._ms.add({ severity: 'success', key:'std', summary: `Loading...` });
+    this._ms.add({ severity: 'info', key:'std', closable:false, icon:'pi pi-spin pi-spinner', life:100000, summary: `Loading...` });
     this._auth.signin(payload)
       .subscribe({
         next: (user)=>{
@@ -53,7 +53,7 @@ export class SigninComponent implements OnInit {
             sessionStorage.setItem("shop_user_details",JSON.stringify(user?.user));
             if(user?.admin == 'true') sessionStorage.setItem("admin",user?.isAdmin);
             setTimeout(() => {
-                 this._router.navigate(['/shopping-with-db']);
+                 this._router.navigate(['/shopping']);
             }, 3000);
           }
         },

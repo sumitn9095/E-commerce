@@ -104,11 +104,14 @@
     @if(productView()) {
     <div class="flex w-full justify-end items-end gap-3">
       <div></div>
+      @if(item !== null) {
       @if(user?.admin){
-      <p-button label="Delete" icon="pi pi-trash" (click)="eventProductAction('delete',item)" />
+      <p-button label="Edit" icon="pi pi-file-edit" (click)="eventProductAction('edit',item)" [severity]="'success'" />
+      <p-button label="Delete" icon="pi pi-trash" [severity]="'danger'" (click)="eventProductAction('delete',item)" />
       } @else {
       @if(item?.instock){
-      <p-button label="Buy" icon="pi pi-check" (click)="eventProductAction('buy',item)" />
+      <p-button label="Buy" icon="pi pi-plus" [severity]="'info'" (click)="eventProductAction('buy',item)" />
+      }
       }
       }
 

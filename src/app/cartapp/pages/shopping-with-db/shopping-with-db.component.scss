@@ -44,8 +44,6 @@ app-sidecart {
       padding: 0.25rem 0.25rem;
     }
 
-
-
     .p-autocomplete {
 
       button,
@@ -54,4 +52,16 @@ app-sidecart {
       }
     }
   }
+}
+
+.toast-prod-mssg {
+  .p-toast-message {
+    padding: 10px !important;
+  }
+}
+
+
+.btn-remove-prod-imgs {
+  top: -15px;
+  right: -15px;
 }

@@ -1,90 +1,103 @@
 <app-header></app-header>
-<p-dropdown [options]="orders" optionLabel="name" [(ngModel)]="selectedOrderName" (onChange)="selectOrder($event)"
-  placeholder="Select Order" />
+
 <div class="">
   <div class="m-3 sm:w-8/12 mx-auto">
-    <div class="card flex justify-content-center">
-      <app-shopping-filters [categoryListDefined]="categoryListDefined" [maxProductPrice]="maxProductPrice"
-        [isCartFilter]="true" (payloadShoppingFilterValue)="filter_cart($event)"></app-shopping-filters>
+    <div class="flex items-center gap-6">
+      <div class="flex flex-col gap-1">
+        <label class="block mb-1">Select Order for Details</label>
+        <p-dropdown [options]="orders" optionLabel="name" [(ngModel)]="selectedOrderName"
+          (onChange)="selectOrder($event)" [placeholder]="'Select Order Id'" />
+      </div>
+      @if(selectedOrderName !== undefined){
+      <div class="flex flex-col gap-1">
+        <label class="block mb-1">&nbsp;</label>
+        <p>Order Id: {{selectedOrderName.name}}</p>
+      </div>
+      }
     </div>
-
-    <p-panel header="Selected Cart Order">
-      @defer (on viewport; prefetch on timer(0)) {
-      <div class="form-group">
-        <div class="flex items-start justify-center">
-          <div class="w-full mx-auto">
-            <div class="card">
-              <div class="flex justify-between items-center">
-                <div class="flex flex-col gap-1">
-                  <label class="block mb-1">Order ID</label>
-                  <input title="Price From" type="text" pInputText formControlName="priceFrom"
-                    [value]="selectedOrder?._id" readonly />
+    <p-divider />
+    <div class="relative mt-20 {{selectedOrderName === undefined ? 'opacity-30' : ''}}">
+      <div class="card flex justify-content-center">
+        <app-shopping-filters [categoryListDefined]="categoryListDefined" [maxProductPrice]="maxProductPrice"
+          [isCartFilter]="true" (payloadShoppingFilterValue)="filter_cart($event)"></app-shopping-filters>
+      </div>
+      <p-panel header="Selected Cart Order">
+        @defer (on viewport; prefetch on timer(0)) {
+        <div class="form-group">
+          <div class="flex items-start justify-center">
+            <div class="w-full mx-auto">
+              <div class="card">
+                <div class="flex justify-between items-center">
+                  <div class="flex flex-col gap-1">
+                    <label class="block mb-1">Order ID</label>
+                    <input title="Price From" type="text" pInputText [value]="selectedOrder?._id" readonly />
+                  </div>
+                  <div class="flex flex-col gap-1">
+                    <label class="block mb-1">Created At</label>
+                    <input title="Price From" type="text" pInputText
+                      value="{{m2(selectedOrder?.orderDetails?.createdAt).format('DD-MM-YYYY')}}" readonly />
+                  </div>
+                  <div class="flex flex-col gap-1">
+                    <label class="block mb-1">Checkout At</label>
+                    <input title="Price From" type="text" pInputText
+                      value="{{m2(selectedOrder?.orderDetails?.checkoutAt).format('DD-MM-YYYY')}}" readonly />
+                  </div>
                 </div>
-                <div class="flex flex-col gap-1">
-                  <label class="block mb-1">Created At</label>
-                  <input title="Price From" type="text" pInputText formControlName="priceFrom"
-                    value="{{m2(selectedOrder?.orderDetails?.createdAt).format('DD-MM-YYYY')}}" readonly />
-                </div>
-                <div class="flex flex-col gap-1">
-                  <label class="block mb-1">Checkout At</label>
-                  <input title="Price From" type="text" pInputText formControlName="priceFrom"
-                    value="{{m2(selectedOrder?.orderDetails?.checkoutAt).format('DD-MM-YYYY')}}" readonly />
-                </div>
+                <p-table [value]="productList()" dataKey="id" [paginator]="true" [rows]="5">
+                  <ng-template pTemplate="header">
+                    <tr>
+                      <th>Id</th>
+                      <th>Name</th>
+                      <th>Category</th>
+                      <th>Manufacturing Date</th>
+                      <th>Expiry Date</th>
+                      <th>Price</th>
+                      <th>Qty</th>
+                      <th>Total Price</th>
+                    </tr>
+                  </ng-template>
+                  <ng-template pTemplate="body" let-order>
+                    <tr class="{{order?.products === undefined ? 'overlay-custom-text-product-deleted' : ''}}">
+                      <td>{{order?.products?.id}}</td>
+                      <td>{{order?.products?.name}}</td>
+                      <td>{{order?.products?.category}}</td>
+                      <td>{{ m2(order?.products?.md).format("DD-MM-YYYY") }}</td>
+                      <td>{{ m2(order?.products?.ed).format("DD-MM-YYYY") }}</td>
+                      <td>{{order?.products?.price}}</td>
+                      <td>{{order?.qty}}</td>
+                      <td>{{order?.products?.price * order?.qty}}</td>
+                    </tr>
+                  </ng-template>
+                  <ng-template pTemplate="footer" let-order>
+                    <tr>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td>{{cartQtyTotal()}}</td>
+                      <td>{{cartPriceTotal()}}</td>
+                    </tr>
+                  </ng-template>
+                </p-table>
               </div>
-              <p-table [value]="productList()" dataKey="id" [paginator]="true" [rows]="5">
-                <ng-template pTemplate="header">
-                  <tr>
-                    <th>Id</th>
-                    <th>Name</th>
-                    <th>Category</th>
-                    <th>Manufacturing Date</th>
-                    <th>Expiry Date</th>
-                    <th>Price</th>
-                    <th>Qty</th>
-                    <th>Total Price</th>
-                  </tr>
-                </ng-template>
-                <ng-template pTemplate="body" let-order>
-                  <tr class="{{order?.products === undefined ? 'overlay-custom-text-product-deleted' : ''}}">
-                    <td>{{order?.products?.id}}</td>
-                    <td>{{order?.products?.name}}</td>
-                    <td>{{order?.products?.category}}</td>
-                    <td>{{order?.products?.md}}</td>
-                    <td>{{order?.products?.ed}}</td>
-                    <td>{{order?.products?.price}}</td>
-                    <td>{{order?.qty}}</td>
-                    <td>{{order?.products?.price * order?.qty}}</td>
-                  </tr>
-                </ng-template>
-                <ng-template pTemplate="footer" let-order>
-                  <tr>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td>{{cartQtyTotal()}}</td>
-                    <td>{{cartPriceTotal()}}</td>
-                  </tr>
-                </ng-template>
-              </p-table>
             </div>
           </div>
         </div>
-      </div>
-      } @placeholder {
-      <div></div>
-      } @loading {
-      <p-progressSpinner></p-progressSpinner>
-      <div>
-        <p-skeleton styleClass="mb-2"></p-skeleton>
-        <p-skeleton styleClass="mb-2"></p-skeleton>
-        <p-skeleton styleClass="mb-2"></p-skeleton>
-      </div>
-      } @error {
-      <i class="pi pi-search"></i>
-      }
-    </p-panel>
+        } @placeholder {
+        <div></div>
+        } @loading {
+        <p-progressSpinner></p-progressSpinner>
+        <div>
+          <p-skeleton styleClass="mb-2"></p-skeleton>
+          <p-skeleton styleClass="mb-2"></p-skeleton>
+          <p-skeleton styleClass="mb-2"></p-skeleton>
+        </div>
+        } @error {
+        <i class="pi pi-search"></i>
+        }
+      </p-panel>
+    </div>
   </div>
 </div>

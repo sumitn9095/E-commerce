@@ -16,7 +16,7 @@
     </div>
 
     <!-- Table structure data -->
-    <p-panel header="Header">
+    <p-panel header="Products Showoom">
       @defer (on viewport; prefetch on timer(0)) {
       <div class="form-group">
         <!-- <form [formGroup]="buyProductsForm"> -->
@@ -24,6 +24,7 @@
         <div class="flex items-start justify-center">
           <div class="w-full mx-auto">
             <div class="card">
+              @if(products()!==undefined && products().products!==undefined && products().products.length) {
               <div class="flex justify-between">
                 <p-button label="Buy" icon="pi pi-check" (click)="singleReq_addProducts()" [size]="'small'" />
                 <div class="flex gap-3">
@@ -62,27 +63,28 @@
                   <p-button label="Download Products Excel" icon="pi pi-download"
                     (click)="processDownloadProductExcel('product')" severity="secondary" [size]="'small'" />
                   <!-- <p-button label="Upload Products Excel" icon="pi pi-upload" [type]="'file'"
-                    (change)="processUploadProductExcel($event)" severity="warning" [size]="'small'" /> -->
+                      (change)="processUploadProductExcel($event)" severity="warning" [size]="'small'" /> -->
 
 
                 </div>
               </div>
+              }
               <p-table [value]="products().products" [(selection)]="selectedProducts" dataKey="id">
                 <ng-template pTemplate="header">
                   <tr>
-                    <th style="width: 4rem">
+                    <th style="width: 2rem">
                       <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
                     </th>
-                    <th>Image</th>
-                    <th>Id</th>
-                    <th>Name</th>
-                    <th>Category</th>
-                    <th>InStock</th>
-                    <th>Price</th>
-                    <th>Manufacturing Date</th>
-                    <th>Expiry Date</th>
-                    <th>Availability span (days)</th>
-                    <th>Action</th>
+                    <th style="width: 20%">Image</th>
+                    <th style="width: 14%">Id</th>
+                    <th style="width: 14%">Name</th>
+                    <th style="width: 14%">Category</th>
+                    <th style="width: 8%">InStock</th>
+                    <th style="width: 8%">Price</th>
+                    <th style="width: 14%">Manufacturing Date</th>
+                    <th style="width: 14%">Expiry Date</th>
+                    <th style="width: 8%">Availability span (days)</th>
+                    <th style="width: 4%">Action</th>
                   </tr>
                 </ng-template>
                 <ng-template pTemplate="body" let-product>
@@ -105,25 +107,27 @@
                     <td>{{product?.price}}</td>
                     <td>{{ m2(product?.md).format("DD-MM-YYYY") }}</td>
                     <td>{{ m2(product?.ed).format("DD-MM-YYYY") }}</td>
+                    <!-- <td>{{ product?.md }}</td>
+                    <td>{{ product?.ed }}</td> -->
                     <td>{{ m2(product?.ed).diff(m2(product?.md), 'days')}}</td>
                     <td>
                       @if(user?.admin){
-                      <p-button class="" icon="pi pi-file-edit"
-                        (click)="shouldAddNewProduct=false;showAddEditPoductModal = true; editProduct(product)"
-                        [rounded]="true" severity="success" />
-                      <p-button class="" icon=" pi pi-trash" (click)="removeProduct(product?._id)" [rounded]="true"
-                        severity="danger" />
+                      <p-button class="" title="Edit Product" icon="pi pi-file-edit" (click)="editProduct(product)"
+                        [rounded]="true" [size]="'small'" severity="success" />
+                      <p-button class="" title="Delete Product" icon=" pi pi-trash"
+                        (click)="removeProduct(product?._id)" [rounded]="true" [size]="'small'" severity="danger" />
                       } @else {
                       @if(product?.instock){
-                      <p-button class="" icon=" pi pi-plus" (click)="addProduct(product)" [rounded]="true"
-                        severity="success" />
+                      <p-button class="" title="Buy Product" icon=" pi pi-plus" (click)="addProduct(product)"
+                        [rounded]="true" [size]="'small'" severity="success" />
                       }
                       }
-                      <p-button class="" icon=" pi pi-eye" (click)="view('product',product?.id)" [rounded]="true"
-                        severity="secondary" />
+                      <p-button class="" title="View Product" icon=" pi pi-eye" (click)="view('product',product?.id)"
+                        [rounded]="true" [size]="'small'" severity="secondary" />
                     </td>
                   </tr>
                 </ng-template>
+
               </p-table>
             </div>
           </div>
@@ -144,11 +148,13 @@
       }
     </p-panel>
 
+    @if(user?.admin) {
     <!-- Table data filters -->
     <!-- <p-button icon="pi pi-plus" class="absolute bottom-10 right-10" severity="success" /> -->
     <p-button class="btn-add-product" title="Add Products" icon="pi pi-plus"
-      (click)="productImgToBeUploaded = []; progressAddEditFormUploadImgs=0; shouldAddNewProduct = true;addNewProduct()"
+      (click)="productImgToBeUploaded = [];  progressAddEditFormUploadImgs=0; shouldAddNewProduct = true;addNewProduct()"
       [rounded]="true" severity="success" [size]="'large'" />
+    }
     }
     @if(pageIs === 'productDetails'){
 
@@ -172,8 +178,8 @@
       }
     </div> -->
 
-    <app-product-display-big-db [item]="selectedProductDetails" [mode]="'read'" [productView]="true"
-      (evt)="$event.type !== 'buy' ? removeProduct($event.product?._id) : addProduct($event.product)">
+    <app-product-display-big-db [item]="selectedProductDetails" [mode]="'read'" [productView]="true" (evt)="$event.type === 'delete' ? removeProduct($event.product?._id) : $event.type === 'buy' ?
+      addProduct($event.product) : editProduct($event.product)">
     </app-product-display-big-db>
 
     } @if(pageIs === 'category') {
@@ -191,15 +197,13 @@
 
 
     @if(user?.admin){
-
-    @if(pageIs === 'product' || pageIs === null){
+    <!-- @if(pageIs === 'product' || pageIs === null){ -->
     <!-- Add / Edit Product -->
     <p-dialog #AddEditPoductModal [header]="shouldAddNewProduct ? 'Add Product' : 'Edit Product'" [modal]="true"
       [(visible)]="showAddEditPoductModal" [style]="{ width: '50rem' }"
       [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [maximizable]="true">
       <form [formGroup]="addEditProductForm" class="add-edit-product-form" enctype="multipart/form-data"
         (ngSubmit)="processAddEditProductForm()">
-
         <div class="grid grid-cols-2 gap-4 ">
           <div class="flex flex-col gap-2 ">
             <label for="username">Name</label>
@@ -217,18 +221,19 @@
           <div class="flex flex-col gap-2">
             <label for="username">Images</label>
             @if(productToBeEdited?.imagePath?.length) {
-            <div class="flex">
+            <div class="flex gap-4">
               <!-- <p-carousel [value]="productToBeEdited.imagePath" [numVisible]="1" [numScroll]="1" [circular]="false">
-                          <ng-template let-product pTemplate="item"> -->
+                                <ng-template let-product pTemplate="item"> -->
               @for (item of productToBeEdited?.imagePath; track '_id') {
-              <div class="imgBox">
-                <p-button class="absolute top-2 right-2" icon=" pi pi-times"
-                  (click)="removeProductImg(productToBeEdited.id,item)" [rounded]="true" severity="danger" />
-                <img [alt]="item" [title]="item" [src]="server_url + item" />
+              <div class="imgBox rounded-md">
+                <p-button class="absolute btn-remove-prod-imgs" icon=" pi pi-times"
+                  (click)="removeProductImg(productToBeEdited.id,item)" [rounded]="true" severity="danger"
+                  [size]="'small'" />
+                <img [alt]="item" class="rounded-md" [title]="item" [src]="server_url + item" />
               </div>
               }
               <!-- </ng-template>
-                        </p-carousel> -->
+               </p-carousel> -->
             </div>
             }
           </div>
@@ -240,25 +245,28 @@
                 <p-progressBar [value]="progressAddEditFormUploadImgs" />
               </div>
             </div>
-            <ng-template [ngIf]="uploadedFiles.length">
-              <ul>
-                <li *ngFor="let file of productImgToBeUploaded">
-                  {{ file.name }} - {{ file.size }} bytes
-                </li>
-              </ul>
+            <ng-template [ngIf]="productImgToBeUploaded !== undefined && productImgToBeUploaded.length">
+
+              @for (file of productImgToBeUploaded; track $index) {
+              @if($index < 3) { <!-- {{ file.name }} - {{ file.size }} bytes -->
+                <p-tag class="block mt-1" icon="pi pi-file" [severity]="'secondary'"
+                  value="{{ file.name }} - {{ file.size }} bytes" />
+                }
+                }
+
             </ng-template>
 
             <!-- <p-fileUpload name="img" (onUpload)="handleProductImgFileupload($event)" (onSelect)="onSelect($event)"
-                      (uploadHandler)="uploadHandler($event)"
-                      (onSend)="onSend($event)" [multiple]="true" accept="image/*" maxFileSize="1000000">
-                      <ng-template pTemplate="content">
-                        <ul *ngIf="uploadedFiles.length">
-                          <li *ngFor="let file of uploadedFiles">
-                            {{ file.name }} - {{ file.size }} bytes
-                          </li>
-                        </ul>
-                      </ng-template>
-                    </p-fileUpload> -->
+                            (uploadHandler)="uploadHandler($event)"
+                            (onSend)="onSend($event)" [multiple]="true" accept="image/*" maxFileSize="1000000">
+                            <ng-template pTemplate="content">
+                              <ul *ngIf="uploadedFiles.length">
+                                <li *ngFor="let file of uploadedFiles">
+                                  {{ file.name }} - {{ file.size }} bytes
+                                </li>
+                              </ul>
+                            </ng-template>
+                          </p-fileUpload> -->
           </div>
         </div>
         <div class="grid grid-cols-2 gap-4  mt-4">
@@ -270,7 +278,7 @@
           <div class="flex flex-col gap-2">
             <label for="username">InStock</label>
             <p-autoComplete [dropdown]="true" [ngModel]="productToBeEdited !== null ? productToBeEdited.instock ? 'In Stock' : 'Out of Stock' :
-                          true" [suggestions]="stockOptions"
+                                true" [suggestions]="stockOptions"
               (completeMethod)="stockOptions=[{name:'In Stock',value:true},{name:'Out of Stock', value:false}]"
               optionLabel="name" name="instock" formControlName="instock" styleClass="w-full" />
           </div>
@@ -278,16 +286,18 @@
         <div class="grid grid-cols-5 gap-4  mt-4">
           <div class="col-span-2 flex flex-col gap-2">
             <label for="username">Manufacturing Date</label>
-            <p-calendar [(ngModel)]="productToBeEdited_md_date" [dateFormat]="'dd/mm/yy'" formControlName="md"
-              [style]="{'width':'100%'}" [inline]="true" (onClose)="selectDate($event)" styleClass="w-full" />
+            <p-calendar [(ngModel)]="productToBeEdited_md_date" dataType="string" formControlName="md"
+              [style]="{'width':'100%'}" [inline]="true" (onClose)="selectDate($event)" (onSelect)="selectDate($event)"
+              styleClass="w-full" />
           </div>
           <div class="flex flex-col gap-2 justify-center items-center">
             <!-- 23 days -->
           </div>
           <div class="col-span-2 flex flex-col gap-2">
             <label for="username">Expiry Date</label>
-            <p-calendar [(ngModel)]="productToBeEdited_ed_date" [dateFormat]="'dd/mm/yy'" formControlName="ed"
-              [style]="{'width':'100%'}" [inline]="true" (onClose)="selectDate($event)" styleClass="w-full" />
+            <p-calendar [(ngModel)]="productToBeEdited_ed_date" dataType="string" formControlName="ed"
+              [style]="{'width':'100%'}" [inline]="true" (onClose)="selectDate($event)" (onSelect)="selectDate($event)"
+              styleClass="w-full" />
           </div>
         </div>
 
@@ -301,7 +311,7 @@
         <!-- </ng-template> -->
       </form>
     </p-dialog>
-    }
+    <!-- } -->
     }
 
     @if(!user?.admin){
@@ -313,7 +323,7 @@
     </app-sidecart>
 
     <!-- Product Add Toast Notification -->
-    <p-toast position="bottom-left" key="addProduct" [baseZIndex]="5000">
+    <p-toast position="bottom-left" key="addProduct" class="toast-prod-mssg" [baseZIndex]="5000">
       <ng-template let-message pTemplate="headless" let-closeFn="closeFn">
         <div class="flex flex-col align-items-start" style="flex: 1">
           <div>

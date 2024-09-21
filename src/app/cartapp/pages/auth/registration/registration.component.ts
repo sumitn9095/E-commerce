@@ -13,11 +13,12 @@ import { ToastModule } from 'primeng/toast';
 import { Router } from '@angular/router';
 import { AutoCompleteModule } from 'primeng/autocomplete';
 import { AuthService } from '../auth.service';
+import { InputGroupModule } from 'primeng/inputgroup';
 
 @Component({
   selector: 'app-registration',
   standalone: true,
-  imports: [HeaderComponent, ReactiveFormsModule, FormsModule,StepsModule, PanelModule, OverlayPanelModule, CalendarModule, InputTextModule, AutoCompleteModule, ButtonModule, ToastModule],
+  imports: [HeaderComponent, ReactiveFormsModule, FormsModule,StepsModule, PanelModule, OverlayPanelModule, CalendarModule, InputTextModule, InputGroupModule, AutoCompleteModule, ButtonModule, ToastModule],
   providers: [CartService, MessageService],
   templateUrl: './registration.component.html',
   styleUrl: './registration.component.scss'

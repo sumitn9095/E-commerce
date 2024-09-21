@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, computed, effect, inject, OnInit, Signal, signal, WritableSignal } from '@angular/core';
+import { AfterViewInit, Component, computed, effect, inject, OnInit, Signal, signal,ViewChild, WritableSignal } from '@angular/core';
 import { HeaderComponent } from '../../components/header/header.component';
 import { SidecartComponent } from '../../components/sidecart/sidecart.component';
 import { CartService } from '../../utility/cart.service';
@@ -25,7 +25,7 @@ import { InputGroupModule } from 'primeng/inputgroup';
 import { ShoppingFiltersComponent } from '../../components/shopping-filters/shopping-filters.component';
 import { ShoppingListComponent } from '../../components/shopping-list/shopping-list.component';
 import { HttpEventType, HttpResponse } from '@angular/common/http';
-import { DialogModule } from 'primeng/dialog';
+import { Dialog, DialogModule } from 'primeng/dialog';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { environment } from '../../../../environments/environment';
 import { CarouselModule } from 'primeng/carousel';
@@ -33,17 +33,17 @@ import { saveAs } from 'file-saver';
 import { CalendarModule } from 'primeng/calendar';
 import { FileUploadModule } from 'primeng/fileupload';
 import { ProgressBarModule } from 'primeng/progressbar';
-import moment, { Moment } from 'moment';
+import moment, { ISO_8601, Moment } from 'moment';
 import { ProductDisplayBigDbComponent } from '../../components/product-display-big-db/product-display-big-db.component';
 import { CommonConstants } from '../../utility/CommonConstants';
-
+import { TagModule } from 'primeng/tag';
 
 @Component({
   selector: 'app-shopping-with-db',
   standalone: true,
   imports: [
     RouterOutlet, HeaderComponent, ShoppingListRxjsComponent, FormsModule, ReactiveFormsModule, SidecartComponent, ToastModule, AsyncPipe, ShoppingListDbComponent,
-    FormsModule, ShoppingListComponent, ReactiveFormsModule,ButtonModule,ProductDisplayBigDbComponent, RouterLink,NgFor, PanelModule, TableModule, SkeletonModule, AutoCompleteModule, InputTextModule, ProgressSpinnerModule, ProgressBarModule, InputGroupAddonModule, InputGroupModule, ShoppingFiltersComponent, DialogModule, CalendarModule,FloatLabelModule, CarouselModule, FileUploadModule],
+    FormsModule, ShoppingListComponent, ReactiveFormsModule,ButtonModule,ProductDisplayBigDbComponent, RouterLink,NgFor, PanelModule, TableModule, SkeletonModule, AutoCompleteModule, InputTextModule, ProgressSpinnerModule, ProgressBarModule, InputGroupAddonModule, InputGroupModule, ShoppingFiltersComponent, DialogModule, CalendarModule,FloatLabelModule, CarouselModule, FileUploadModule, TagModule],
   providers: [MessageService],
   templateUrl: './shopping-with-db.component.html',
   styleUrl: './shopping-with-db.component.scss'
@@ -131,6 +131,8 @@ export class ShoppingWithDbComponent implements OnInit, AfterViewInit {
       }
     })
   }
+
+  @ViewChild('showLoaderDialog') showLoaderDialog!:Dialog
     
   ngOnInit(): void {
     if(typeof window !== "undefined"){
@@ -220,10 +222,19 @@ export class ShoppingWithDbComponent implements OnInit, AfterViewInit {
 
   // - ADMIN (action)
   editProduct(product:any){
+    this.shouldAddNewProduct=false;
+    this.progressAddEditFormUploadImgs=0;
+    this.showAddEditPoductModal =true;
+    this.productImgToBeUploaded = []
     this.productToBeEdited=product;
     this.productToBeEdited_md_date = new Date(this.productToBeEdited.md);
     this.productToBeEdited_ed_date = new Date(this.productToBeEdited.ed);
-    console.log("product",product)
+    // this.productToBeEdited_md_date = moment(this.productToBeEdited.md).format().toDate;
+    // this.productToBeEdited_ed_date = moment(this.productToBeEdited.ed).toDate();
+    let fgg = moment(this.productToBeEdited.ed).toString();
+    let fgg2 = moment(this.productToBeEdited.ed).toISOString();
+    let hk = 
+    console.log("ED",fgg,fgg2)
   }
 
   addNewProduct(){
@@ -237,10 +248,21 @@ export class ShoppingWithDbComponent implements OnInit, AfterViewInit {
 
   handleProductImg(e :any) {
     //var newFile = new File([e.target.files[0]], "taskPhoto", {type: ".png"});
-    this.productImgToBeUploaded = e.target.files;
-    // for(let file of e.target.files) {
-    //     this.uploadedFiles.push(file);
-    // }
+    //this.productImgToBeUploaded = e.target.files;
+
+    //this.productImgToBeUploaded = Array(2)
+    this.productImgToBeUploaded = Array.from(e.target.files);
+    console.log("this.productImgToBeUploaded",this.productImgToBeUploaded);
+    this._ms.add({ severity: 'info', key:'std', summary: 'Only first 3 images will be uploaded, as Product images'});
+    // this.productImgToBeUploaded[0] = imgsToUpload[0].File
+    // this.productImgToBeUploaded[1] = imgsToUpload[1].File
+    // this.productImgToBeUploaded[2] = imgsToUpload[2].File
+    
+    // let filecntr=0;
+    // for(let file of imgsToUpload) {
+    //   if(filecntr < 3) this.productImgToBeUploaded.push(file);
+    //   else filecntr++
+    // };
   }
   handleProductImgFileupload(e :any) {
    // this.productImgToBeUploaded = e.target.files;
@@ -265,10 +287,11 @@ export class ShoppingWithDbComponent implements OnInit, AfterViewInit {
   // - ADMIN (action)
   processAddEditProductForm() {
     if(this.addEditProductForm.status === 'INVALID') return;
+    console.log("this.addEditProductForm.value-------",this.addEditProductForm.value)
     this.addEditProductForm.value.instock = this.addEditProductForm.value.instock.value !== undefined ? this.addEditProductForm.value.instock.value : true;
     //console.log("this.addEditProductForm.value",this.addEditProductForm.value, this.addEditProductForm.status);
     let obj;
-    if(this.shouldAddNewProduct){
+    if(this.shouldAddNewProduct) {
       obj = {
         payload:this.addEditProductForm.value,
         files:this.productImgToBeUploaded,
@@ -292,11 +315,15 @@ export class ShoppingWithDbComponent implements OnInit, AfterViewInit {
           this.progressAddEditFormUploadImgs = (100 * event.loaded) / event.total;
           console.log("upload progress - ",this.progressAddEditFormUploadImgs);
         } else if(event instanceof HttpResponse) {
-          this.progressAddEditFormUploadImgs = 100;
-          console.log("upload completed - ",event.body);
-          this._ms.add({ severity: 'success', key:'std', summary: `Product ${this.shouldAddNewProduct ? 'added' : 'updated'} successfully` });
-          this.fetch_products();
-          this.showAddEditPoductModal=false;
+          if(event?.body?.err != null){
+            this._ms.add({ severity: 'error', key:'std', summary: event?.body?.err?.message ?? 'Some error occured'})
+          } else {
+            this.progressAddEditFormUploadImgs = 100;
+            console.log("upload completed - ",event.body);
+            this._ms.add({ severity: 'success', key:'std', summary: `Product Id:${event?.body?.product?.id} ${this.shouldAddNewProduct ? 'added' : 'updated'} successfully` });
+            this.fetch_products();
+            this.showAddEditPoductModal=false;
+          }
         }
       },
       error: (err:Error)=>{
@@ -310,7 +337,7 @@ export class ShoppingWithDbComponent implements OnInit, AfterViewInit {
     this._shop.removeProduct(productId).subscribe({
       next: (p)=>{
         this.fetch_products();
-        this._ms.add({ severity: 'success', key:'std',  summary: `Removed Product successfully` });
+        this._ms.add({ severity: 'success', key:'std',  summary: `Removed Product Id:${productId} successfully` });
       },
       error: (err:Error)=>{
         this._ms.add({ severity: 'error',key:'std',  summary: `Error occured while removing product.` });
@@ -326,7 +353,7 @@ export class ShoppingWithDbComponent implements OnInit, AfterViewInit {
       next: (p)=>{
         let remainingProductImgs:string[] = this.productToBeEdited?.imagePath.filter((i:string) => i !== productImg);
         this.productToBeEdited.imagePath = [...remainingProductImgs];
-        this._ms.add({ severity: 'success', key:'std',  summary: `Removed Product image successfully` });
+        this._ms.add({ severity: 'success', key:'std',  summary: `Removed Product Id:${productId} image successfully` });
       },
       error: (err:Error)=>this._ms.add({ severity: 'error',key:'std',  summary: `Error while removing Product image` })
     })
@@ -346,6 +373,7 @@ export class ShoppingWithDbComponent implements OnInit, AfterViewInit {
         if (event.type == HttpEventType.Sent) {
           console.log("upload started - ")
           this.showLoader=true;
+          this.showLoaderDialog.header = 'Downloading Product PDF';
           this.progressValue = 0;
         } else if(event.type == HttpEventType.DownloadProgress) {
           this.progressValue = (100 * event.loaded) / event.total;
@@ -353,7 +381,10 @@ export class ShoppingWithDbComponent implements OnInit, AfterViewInit {
         } else if(event instanceof HttpResponse) {
           console.log("upload completed - ",event.body);
           this.progressValue = 100;
-          this.showLoader=false;
+          setTimeout(() => {
+            this.showLoader=false;
+          }, 2000);
+          
           // let binaryData = [];
           //   binaryData.push(event.body);
           // let llop = new Uint8Array(event.body, 0, event.body.byteLength)
@@ -390,13 +421,16 @@ export class ShoppingWithDbComponent implements OnInit, AfterViewInit {
         if (event.type == HttpEventType.Sent) {
           console.log("upload started - ")
           this.showLoader=true;
+          this.showLoaderDialog.header = 'Downloading Product Excel';
           this.progressValue = 0;
         } else if(event.type == HttpEventType.DownloadProgress) {
           this.progressValue = (100 * event.loaded) / event.total;
           console.log("download progress - ", this.progressValue);
         } else if(event instanceof HttpResponse) {
           this.progressValue = 100;
-          this.showLoader=false;
+          setTimeout(() => {
+            this.showLoader=false;
+          }, 2000);
           console.log("upload completed - ",event.body);
           var file = new File([event.body], `${this.user?.name}-${type}-${type === 'cart' ? this.orderId : ''}`, {type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
           saveAs(file);
@@ -415,13 +449,16 @@ export class ShoppingWithDbComponent implements OnInit, AfterViewInit {
         if (event.type == HttpEventType.Sent) {
           console.log("upload started - ")
           this.showLoader=true;
+          this.showLoaderDialog.header = 'Uploading Product Excel';
           this.progressValue = 0;
         } else if(event.type == HttpEventType.UploadProgress) {
           this.progressValue = (100 * event.loaded) / event.total;
           console.log("Upload progress - ", this.progressValue);
         } else if(event instanceof HttpResponse) {
           this.progressValue = 100;
-          this.showLoader=false;
+          setTimeout(() => {
+            this.showLoader=false;
+          }, 2000);
           console.log("upload completed - ",event.body);
           this.fetch_products()
           this._ms.add({ severity: 'success', key: 'std',  summary: `Successfully Uploaded all products Excel` });
@@ -456,6 +493,7 @@ export class ShoppingWithDbComponent implements OnInit, AfterViewInit {
 
 
   selectDate(data:any){
+    console.log("this.addEditProductForm.value-------",this.addEditProductForm.value)
     console.log(data)
   }
 
@@ -595,17 +633,17 @@ export class ShoppingWithDbComponent implements OnInit, AfterViewInit {
             let allProducts:any = products?.body;
             //console.log("allProducts",allProducts);
             let allProductsUpdated:any;
-            allProducts.products.map((o:any) => {
-              if(o.md || o.ed) {
-                let omd:any = moment(o.md);
-                let oed:any = moment(o.ed);
-                o.md_ed_diff = oed.diff(omd,"days");
-              }
-              if(o.md) {o.md = moment(o.md).format("DD-MM-YYYY");};
-              if(o.ed) {o.ed = moment(o.ed).format("DD-MM-YYYY");};
+            //allProducts.products.map((o:any) => {
+              // if(o.md || o.ed) {
+              //   let omd:any = moment(o.md);
+              //   let oed:any = moment(o.ed);
+              //   o.md_ed_diff = oed.diff(omd,"days");
+              // }
+              // if(o.md) {o.md = moment(o.md).format("DD-MM-YYYY");};
+              // if(o.ed) {o.ed = moment(o.ed).format("DD-MM-YYYY");};
               ///console.log("-o-",o);
              // allProductsUpdated.push(o);
-            });
+            //});
             console.log("allProducts",allProducts);
             this.products.update(()=>allProducts);
             console.log("this.products",this.products());
@@ -691,7 +729,16 @@ export class ShoppingWithDbComponent implements OnInit, AfterViewInit {
     this._shop.fetchProduct(id).subscribe({
       next:(product:any)=>{
         this.selectedProductDetails = product;
-        this._ms.add({ severity: 'success', key: 'std',  summary: `Product ${id}-${product.name} fetched` });
+        let mssg:string='';
+        if(product === null) {
+          mssg = 'Product has been deleted or doesnt exists';
+          this._ms.add({ severity: 'error', key: 'std',  summary: mssg });
+        }
+        else {
+          mssg = `Product ${id}-${product.name} fetched`;
+          this._ms.add({ severity: 'success', key: 'std',  summary: mssg });
+        }
+        
       }
     })
   }
@@ -705,6 +752,13 @@ export class ShoppingWithDbComponent implements OnInit, AfterViewInit {
       next: (products) => {
         if(products instanceof HttpResponse) {
           this.products.update(() => products.body);
+          let products_mssg:string = ''
+          if(!this.products().products?.length){ 
+            products_mssg = 'No Products to show';
+            this._ms.add({ severity: 'error', key: 'std',  summary: products_mssg });
+          }
+          else{ products_mssg = 'Products Filtered';
+          this._ms.add({ severity: 'success', key: 'std',  summary: products_mssg });}
         }
       },
       error: (err) => {
